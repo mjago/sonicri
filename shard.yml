@@ -1,0 +1,15 @@
+name: PodPicr
+version: 0.1.0
+
+authors:
+  - mjago <martyn.jago@btinternet.com>
+
+targets:
+  podcast:
+    main: src/podpicr.cr
+
+crystal: 0.22.0
+
+license: MIT
+
+dependencies:
