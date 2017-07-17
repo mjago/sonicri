@@ -5,9 +5,9 @@ Podcast Picker
 ## Installation
 
 Requires:
- - libao
  - libmpg123
- - libncurses (modified)
+ - libao
+ - libncurses
 
 ## Usage
 
