@@ -1,18 +1,18 @@
 # podcast
 
-Podcast Picker
+PodPicr
 
 ## Installation
 
-Requires libao, libmpg123, libcurses
+Requires libao, libmpg123, libcurses (modified)
 
 ## Usage
 
-bin/pp
+WIP
 
 ## Development
 
-TODO: Write development instructions here
+WIP
 
 ## Contributing
 
