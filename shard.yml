@@ -19,6 +19,9 @@ dependencies:
   libao:
     github: mjago/libao
     branch: master
+  libmpg123:
+    github: mjago/libmpg123
+    branch: master
 
 
 

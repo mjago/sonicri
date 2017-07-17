@@ -1,7 +1,7 @@
 # coding: utf-8
 
 require "libao"
-require "../../../libmpg123/src/*"
+require "libmpg123"
 require "time"
 
 module PodPicr
