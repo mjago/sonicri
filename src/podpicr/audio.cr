@@ -1,6 +1,6 @@
 # coding: utf-8
 
-require "../../../libao/src/*"
+require "libao"
 require "../../../libmpg123/src/*"
 require "time"
 

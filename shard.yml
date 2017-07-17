@@ -16,6 +16,9 @@ dependencies:
   ncurses:
     github: mjago/ncurses-crystal
     branch: add_features
+  libao:
+    github: mjago/libao
+    branch: master
 
 
 
