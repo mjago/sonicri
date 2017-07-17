@@ -7,7 +7,7 @@ module PodPicr
     TEMP_LIST   = "tmp.opml"
     DEBUG_LIST  = false
     FileAddress = "http://www.bbc.co.uk/podcasts.opml"
-    OPML_File   = "src/podpicr/podcasts.xml"
+    OPML_File   = "podcasts.xml"
 
     # FileAddress = "http://feeds.twit.tv/twitshows.opml"
 
