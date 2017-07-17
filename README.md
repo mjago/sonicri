@@ -1,10 +1,13 @@
-# podcast
+# PodPicr
 
-PodPicr
+Podcast Picker
 
 ## Installation
 
-Requires libao, libmpg123, libcurses (modified)
+Requires:
+ - libao
+ - libmpg123
+ - libncurses (modified)
 
 ## Usage
 
