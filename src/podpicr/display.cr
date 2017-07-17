@@ -1,4 +1,4 @@
-require "../../../ncurses/src/ncurses.cr"
+require "ncurses"
 
 module PodPicr
   class Display

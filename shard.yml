@@ -13,3 +13,9 @@ crystal: 0.22.0
 license: MIT
 
 dependencies:
+  ncurses:
+    github: mjago/ncurses-crystal
+    branch: add_features
+
+
+
