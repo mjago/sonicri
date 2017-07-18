@@ -19,7 +19,7 @@ module PodPicr
 
     BUF_SIZE  = 4096
     BUF_COUNT =    2
-    INFO_LINE_LENGTH = 57
+    INFO_LINE_LENGTH = 55
     INFO_POS_ROW = 23
     INFO_POS_COL = 0
 
@@ -235,7 +235,6 @@ module PodPicr
       spawn do
         loop do
           if k = @keys
-            "\n\n             Hit Q to quit"
             ip = k.check_input
             if ip == {action: "char", value: "q"}
               quit

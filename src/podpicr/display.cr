@@ -11,7 +11,7 @@ module PodPicr
     HeadingColor      = 7
     ItemInactiveColor = 8
 
-    HIT_SPACE = 31
+    HIT_SPACE = 29
 
     getter window
     setter page
@@ -153,7 +153,7 @@ module PodPicr
       @window.print("\n" + (" " * HIT_SPACE) + "Hit ")
       @window.with_color(InstructionColor) { @window.print(" Arrow Keys ") }
       @window.print(" to cycle, ")
-      @window.with_color(InstructionColor) { @window.print(" Q ") }
+      @window.with_color(InstructionColor) { @window.print(" ESC ") }
       @window.print(" to quit, ")
       @window.with_color(InstructionColor) { @window.print(" H ") }
       @window.print(" for help...\n")

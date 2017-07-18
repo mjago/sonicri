@@ -78,6 +78,11 @@ module PodPicr
           else
             return {action: "char", value: char.chr.to_s}
           end
+        elsif esc == 1
+          # ESC key
+          STDIN.flush
+          esc = 0
+          return {action: "char", value: "q"}
         end
         sleep 0.01
       end
