@@ -19,6 +19,9 @@ module PodPicr
 
     BUF_SIZE  = 4096
     BUF_COUNT =    2
+    INFO_LINE_LENGTH = 57
+    INFO_POS_ROW = 23
+    INFO_POS_COL = 0
 
     def initialize
       @mpg = Mp.new
@@ -107,20 +110,13 @@ module PodPicr
       end
     end
 
-    #    private def await_buffer_fill
-    #      while io_bytes_count < (BUF_SIZE)
-    #        break if @quit
-    #        Fiber.yield
-    #      end
-    #    end
-
     private def now
       ::Time.now.epoch
     end
 
     private def display(str)
       if win = @win
-        win.move(23, 0)
+        win.move(INFO_POS_ROW, INFO_POS_COL)
         win.print(str)
         win.refresh
       else
@@ -158,17 +154,21 @@ module PodPicr
     private def display_progress
       if win = @win
         if @total_size > 0_i64
-          win.move(23, 0)
-          str = "rate: #{@rate}/#{@bits}, size: #{@total_size}, length: #{@length}"
-          while str.size < 58
-            str += " "
-          end
-          win.print(str)
+          win.move(INFO_POS_ROW, INFO_POS_COL)
+          win.print(info_line)
           win.refresh
         end
       else
         raise "Error: no Window!"
       end
+    end
+
+    private def info_line
+      info = "Rate: #{@rate}/#{@bits}, Size: #{@total_size}, Length: #{@length}"
+      while info.size < INFO_LINE_LENGTH
+        info += " "
+      end
+      info
     end
 
     private def process_result(result)
