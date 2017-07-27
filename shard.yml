@@ -14,8 +14,8 @@ license: MIT
 
 dependencies:
   ncurses:
-    github: mjago/ncurses-crystal
-    branch: add_features
+    github: jreinert/ncurses-crystal
+    branch: master
   libao:
     github: mjago/libao
     branch: master
