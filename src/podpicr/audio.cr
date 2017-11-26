@@ -17,11 +17,11 @@ module PodPicr
     include Libao
     include Libmpg123
 
-    BUF_SIZE  = 4096
-    BUF_COUNT =    2
-    INFO_LINE_LENGTH = 55
-    INFO_POS_ROW = 23
-    INFO_POS_COL = 0
+    BUF_SIZE         = 4096
+    BUF_COUNT        =    2
+    INFO_LINE_LENGTH =   55
+    INFO_POS_ROW     =   23
+    INFO_POS_COL     =    0
 
     def initialize
       @mpg = Mp.new

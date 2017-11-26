@@ -14,8 +14,8 @@ license: MIT
 
 dependencies:
   ncurses:
-    github: jreinert/ncurses-crystal
-    branch: master
+    github: mjago/ncurses-crystal
+    branch: attr_mask_fix
   libao:
     github: mjago/libao
     branch: master
