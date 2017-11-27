@@ -27,7 +27,6 @@ module PodPicr
       @mpg = Mp.new
       @mpg.new(nil)
       @ao = Ao.new
-      @ch_exit = Channel(Nil).new
       @ch_play = Channel(Nil).new
       @dl = Downloader.new
       @dl.chunk_size = BUF_SIZE
@@ -177,7 +176,6 @@ module PodPicr
         @ch_play.send(nil)
       when LibMP::MP_Errors::MP_NEED_MORE.value
         quit if @total_size >= @length
-        @ch_exit.send(nil) if @quit
       when LibMP::MP_Errors::MP_BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       else
@@ -236,7 +234,6 @@ module PodPicr
             ip = k.check_input
             if ip == {action: "char", value: "q"}
               quit
-              @ch_exit.send nil
               break
             end
             Fiber.yield
