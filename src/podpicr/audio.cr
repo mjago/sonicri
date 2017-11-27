@@ -22,6 +22,10 @@ module PodPicr
     INFO_POS_COL     =    0
 
     def initialize
+      @io_readpos = @done = @rate =
+        @length = @total_size = 0_i64
+      @running = @quit = false
+      @bits = 0
       @mpg = Mp.new
       @mpg.new(nil)
       @ao = Ao.new
@@ -29,21 +33,22 @@ module PodPicr
       @dl = Downloader.new
       @dl.chunk_size = BUF_SIZE
       @io = IO::Memory.new
-      @io_readpos = 0_i64
-      @quit = false
       @inslice = Bytes.new(BUF_SIZE)
       @auxslice = Bytes.new(BUF_SIZE)
       @ao_buf = Bytes.new(BUF_SIZE)
-      @done = 0_i64
-      @rate = 0_i64
-      @bits = 0
       @then = ::Time.now.epoch.to_i64
-      @length = 0_i64
-      @total_size = 0_i64
     end
 
     def feed(url)
       @mpg.new(nil)
+    end
+
+    def stop
+      @io.flush
+      @dl.quit
+      @quit = true
+      sleep 0.3
+      initialize
     end
 
     def quit
@@ -68,6 +73,10 @@ module PodPicr
       @io.size - @io_readpos
     end
 
+    def running?
+      @running
+    end
+
     def run(addr, @length = length)
       io = IO::Memory.new
       redir = @dl.get_redirect(addr)
@@ -76,17 +85,17 @@ module PodPicr
       fiber_update_display
       fiber_decode_chunks
       fiber_play_chunks
+      @running = true
     end
 
     private def set_audio_format
-      @rate, channels, encoding = 0_i64, 0, 0
+      @rate = @done = 0_i64
+      channels = encoding = 0
       @mpg.get_format(pointerof(@rate), pointerof(channels), pointerof(encoding))
       @bits = @mpg.encsize(encoding) * 8
       byte_format = LibAO::Byte_Format::AO_FMT_BIG
-      matrix = nil
-      @ao.set_format(@bits, @rate, channels, byte_format, matrix)
+      @ao.set_format(@bits, @rate, channels, byte_format, matrix = nil)
       @ao.open_live
-      @done = 0_i64
     end
 
     private def decode(inp, insize, outsize)
@@ -200,11 +209,9 @@ module PodPicr
             data = io_read @inslice
             @total_size += size
           else
-            #            sleep 2
             size = 0_i64
             data = @auxslice
           end
-
           result = decode(data, size, outsize)
           process_result(result)
           Fiber.yield

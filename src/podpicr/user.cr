@@ -46,6 +46,9 @@ module PodPicr
       @title = ""
       @xmlUrl = ""
       @ui = UI.new
+      @audio = Audio.new
+      win = @ui.display.window
+      @audio.win = win
     end
 
     private def process_state
@@ -185,12 +188,7 @@ module PodPicr
     end
 
     private def program_play_state
-      audio = Audio.new
-      keys = @ui.keys
-      win = @ui.display.window
-      audio.keys = keys
-      audio.win = win
-      audio.run @program_url, @length
+      play
       A::Back
     end
 
@@ -204,6 +202,14 @@ module PodPicr
 
     private def do_events
       sleep(0.001)
+    end
+
+    def play
+      @audio.stop if @audio.running?
+      while @audio.running?
+        sleep 0.2
+      end
+      @audio.run @program_url, @length
     end
   end
 end
