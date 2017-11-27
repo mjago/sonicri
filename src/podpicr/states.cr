@@ -15,15 +15,15 @@ module PodPicr
 
   enum UserAction
     NoAction
-    Inited
+    Init
     ListAged
     ListParsed
-    StationInited
+    StationInit
     Back
     StationSeld
-    TitleInited
+    TitleInit
     TitleSeld
-    ProgramInited
+    ProgramInit
     ProgramSeld
     Exit
   end
