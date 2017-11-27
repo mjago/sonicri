@@ -80,8 +80,6 @@ module PodPicr
       fiber_decode_chunks
       fiber_play_chunks
       fiber_monitor_keys
-      await_exit
-      return true
     end
 
     private def set_audio_format
@@ -245,11 +243,6 @@ module PodPicr
           end
         end
       end
-    end
-
-    private def await_exit
-      @ch_exit.receive
-      close
     end
 
     private def close
