@@ -1,51 +1,13 @@
 module PodPicr
-  enum KeyValue
-    RSS_Select
-    ProgramSelect
-    NoSelect
-    DownArrow
-    UpArrow
-  end
-
-  enum ModeValue
-    NoMode
-    ListMode
-    ProgramMode
-  end
-
-  alias K = KeyValue
-  alias M = ModeValue
-
   class Keys
-    setter mode
 
     def initialize(@win : NCurses::Window)
-      @mode = M::NoMode
-    end
-
-    def action
-      puts "mode: (#{@mode})"
-      case @mode
-      when M::NoMode
-        return K::NoSelect
-      when M::ListMode
-        return K::RSS_Select
-      when M::ProgramMode
-        return K::ProgramSelect
-      else
-        raise "Error: Invalid mode (#{@mode})"
-      end
     end
 
     def check_input
       @win.try do |win|
         try_key(win)
       end
-    end
-
-    def details(count, bg)
-      str = "#{count})#{bg}"
-      str + (" " * (5 - str.size))
     end
 
     def try_key(win)

@@ -35,7 +35,7 @@ module PodPicr
 
     def stations_monitor
       res = @keys.check_input
-      if res.class == NamedTuple(action: String, value: String)
+      if key_message? res
         case res[:action]
         when "selection"
           @display.redraw(res)
@@ -50,12 +50,11 @@ module PodPicr
           end
         end
       end
-      false
     end
 
     def titles_monitor
       res = @keys.check_input
-      if res.class == NamedTuple(action: String, value: String)
+      if key_message? res
         case res[:action]
         when "selection"
           @display.redraw(res)
@@ -71,7 +70,6 @@ module PodPicr
           end
         end
       end
-      false
     end
 
     def programs_init(rss)
@@ -83,7 +81,7 @@ module PodPicr
 
     def programs_monitor
       res = @keys.check_input
-      if res.class == NamedTuple(action: String, value: String)
+      if key_message? res
         case res[:action]
         when "selection"
           @display.redraw(res)
@@ -98,7 +96,10 @@ module PodPicr
           end
         end
       end
-      false
+    end
+
+    private def key_message?(res)
+      res.class == NamedTuple(action: String, value: String)
     end
   end
 end
