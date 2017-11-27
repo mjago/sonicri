@@ -6,12 +6,10 @@ require "time"
 
 module PodPicr
   class Audio
-    @keys : Keys | Nil
     @win : NCurses::Window | Nil
     @then : Int64
     @length : Int64
     @total_size : Int64
-    setter keys
     setter win
 
     include Libao
@@ -78,7 +76,6 @@ module PodPicr
       fiber_update_display
       fiber_decode_chunks
       fiber_play_chunks
-      fiber_monitor_keys
     end
 
     private def set_audio_format
@@ -138,7 +135,7 @@ module PodPicr
     end
 
     private def fiber_update_display
-      #      display_buffering
+      # display_buffering
       spawn do
         loop do
           break if @quit
@@ -227,26 +224,10 @@ module PodPicr
       end
     end
 
-    private def fiber_monitor_keys
-      spawn do
-        loop do
-          if k = @keys
-            ip = k.check_input
-            if ip == {action: "char", value: "q"}
-              quit
-              break
-            end
-            Fiber.yield
-          end
-        end
-      end
-    end
-
     private def close
       sleep 0.1
       @mpg.exit
       @ao.exit
-      @keys = nil
       @win = nil
     end
   end
