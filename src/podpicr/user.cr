@@ -11,15 +11,15 @@ module PodPicr
         {st: S::Init, res: A::Init, to: S::ListAge},
         {st: S::ListAge, res: A::ListAged, to: S::ListParse},
         {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
-        {st: S::StationInit, res: A::StationInit, to: S::StationMon},
-        {st: S::StationMon, res: A::StationSeld, to: S::TitleInit},
-        {st: S::StationMon, res: A::Exit, to: S::Exit},
-        {st: S::TitleInit, res: A::TitleInit, to: S::TitleMon},
-        {st: S::TitleMon, res: A::TitleSeld, to: S::ProgramInit},
-        {st: S::TitleMon, res: A::Back, to: S::StationInit},
-        {st: S::ProgramInit, res: A::ProgramInit, to: S::ProgramMon},
-        {st: S::ProgramMon, res: A::ProgramSeld, to: S::ProgramPlay},
-        {st: S::ProgramMon, res: A::Back, to: S::TitleInit},
+        {st: S::StationInit, res: A::StationInit, to: S::StationSel},
+        {st: S::StationSel, res: A::StationSeld, to: S::TitleInit},
+        {st: S::StationSel, res: A::Exit, to: S::Exit},
+        {st: S::TitleInit, res: A::TitleInit, to: S::TitleSel},
+        {st: S::TitleSel, res: A::TitleSeld, to: S::ProgramInit},
+        {st: S::TitleSel, res: A::Back, to: S::StationInit},
+        {st: S::ProgramInit, res: A::ProgramInit, to: S::ProgramSel},
+        {st: S::ProgramSel, res: A::ProgramSeld, to: S::ProgramPlay},
+        {st: S::ProgramSel, res: A::Back, to: S::TitleInit},
         {st: S::ProgramPlay, res: A::Back, to: S::ProgramInit},
         {st: S::Exit, res: A::Exit, to: S::Exit},
       ]
@@ -29,11 +29,11 @@ module PodPicr
         {st: S::ListAge, fn: ->list_age_state},
         {st: S::ListParse, fn: ->list_parse_state},
         {st: S::StationInit, fn: ->station_init_state},
-        {st: S::StationMon, fn: ->station_mon_state},
+        {st: S::StationSel, fn: ->station_sel_state},
         {st: S::TitleInit, fn: ->title_init_state},
-        {st: S::TitleMon, fn: ->title_mon_state},
+        {st: S::TitleSel, fn: ->title_sel_state},
         {st: S::ProgramInit, fn: ->program_init_state},
-        {st: S::ProgramMon, fn: ->program_mon_state},
+        {st: S::ProgramSel, fn: ->program_sel_state},
         {st: S::ProgramPlay, fn: ->program_play_state},
         {st: S::Exit, fn: ->exit_state},
       ]
@@ -110,8 +110,8 @@ module PodPicr
       A::StationInit
     end
 
-    private def station_mon_state
-      case station_mon
+    private def station_sel_state
+      case station_sel
       when :station_selected; A::StationSeld
       when :cancelled       ; A::Exit
       else
@@ -124,8 +124,8 @@ module PodPicr
       A::TitleInit
     end
 
-    private def title_mon_state
-      case title_mon
+    private def title_sel_state
+      case title_sel
       when :title_selected; A::TitleSeld
       when :cancelled     ; A::Back
       else
@@ -138,8 +138,8 @@ module PodPicr
       A::ProgramInit
     end
 
-    private def program_mon_state
-      case program_mon
+    private def program_sel_state
+      case program_sel
       when :program_selected; A::ProgramSeld
       when :cancelled       ; A::Back
       else
@@ -148,7 +148,7 @@ module PodPicr
     end
 
     private def program_play_state
-      play
+      program_play
       A::Back
     end
 
@@ -170,7 +170,7 @@ module PodPicr
       end
     end
 
-    private def station_mon
+    private def station_sel
       if (ui = @ui)
         res = ui.stations_monitor
         if (res.is_a?({action: String, station: String}))
@@ -196,7 +196,7 @@ module PodPicr
       end
     end
 
-    private def title_mon
+    private def title_sel
       if (ui = @ui)
         res = ui.titles_monitor
         if (res.is_a?({action: String, xmlUrl: String}))
@@ -222,7 +222,7 @@ module PodPicr
       end
     end
 
-    private def program_mon
+    private def program_sel
       if (ui = @ui)
         res = ui.programs_monitor
         if (res.is_a?({action: String, value: String}))
@@ -242,7 +242,7 @@ module PodPicr
       :no_action
     end
 
-    private def play
+    private def program_play
       @audio.stop if @audio.running?
       while @audio.running?
         sleep 0.2

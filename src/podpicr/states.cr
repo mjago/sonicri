@@ -4,11 +4,11 @@ module PodPicr
     ListAge
     ListParse
     StationInit
-    StationMon
+    StationSel
     TitleInit
-    TitleMon
+    TitleSel
     ProgramInit
-    ProgramMon
+    ProgramSel
     ProgramPlay
     Exit
   end
