@@ -25,17 +25,17 @@ module PodPicr
       ]
 
       @states = [
-        {st: S::Init, fn: ->st_initialize},
-        {st: S::ListAge, fn: ->st_list_check_age},
-        {st: S::ListParse, fn: ->st_list_parse},
-        {st: S::StationInit, fn: ->st_stations_init},
-        {st: S::StationMon, fn: ->st_stations_monitor},
-        {st: S::TitleInit, fn: ->st_titles_init},
-        {st: S::TitleMon, fn: ->st_titles_monitor},
-        {st: S::ProgramInit, fn: ->st_programs_init},
-        {st: S::ProgramMon, fn: ->st_programs_monitor},
-        {st: S::ProgramPlay, fn: ->st_play_program},
-        {st: S::Exit, fn: ->st_exit},
+        {st: S::Init, fn: ->init_state},
+        {st: S::ListAge, fn: ->list_age_state},
+        {st: S::ListParse, fn: ->list_parse_state},
+        {st: S::StationInit, fn: ->station_init_state},
+        {st: S::StationMon, fn: ->station_mon_state},
+        {st: S::TitleInit, fn: ->title_init_state},
+        {st: S::TitleMon, fn: ->title_mon_state},
+        {st: S::ProgramInit, fn: ->program_init_state},
+        {st: S::ProgramMon, fn: ->program_mon_state},
+        {st: S::ProgramPlay, fn: ->program_play_state},
+        {st: S::Exit, fn: ->exit_state},
       ]
 
       @state = State.new @user_state
@@ -86,31 +86,31 @@ module PodPicr
 
     # states
 
-    private def st_initialize
+    private def init_state
       A::Inited
     end
 
-    private def st_list_check_age
+    private def list_age_state
       @list.update if @list.outdated?
       A::ListAged
     end
 
-    private def st_list_parse
+    private def list_parse_state
       @list.parse
       A::ListParsed
     end
 
-    private def st_stations_init
+    private def station_init_state
       @ui.list = @list
       if ui = @ui
         ui.init_list({type: "stations", value: ""})
       else
-        raise("Error: Invalid list in User#st_stations_init")
+        raise("Error: Invalid list in User#station_init_state")
       end
       A::StationInited
     end
 
-    private def st_stations_monitor
+    private def station_mon_state
       if (ui = @ui)
         res = ui.stations_monitor
         if (res.is_a?({action: String, station: String}))
@@ -126,18 +126,18 @@ module PodPicr
       A::NoAction
     end
 
-    private def st_titles_init
+    private def title_init_state
       if (list = @list)
         if ui = @ui
           ui.init_list({type: "titles", value: "#{@title}"})
         else
-          raise("Error: Invalid list in User#st_titles_init")
+          raise("Error: Invalid list in User#title_init_state")
         end
       end
       A::TitleInited
     end
 
-    private def st_titles_monitor
+    private def title_mon_state
       if (ui = @ui)
         res = ui.titles_monitor
         if (res.is_a?({action: String, xmlUrl: String}))
@@ -153,7 +153,7 @@ module PodPicr
       A::NoAction
     end
 
-    private def st_programs_init
+    private def program_init_state
       @rss.parse(@xmlUrl)
       if (list = @list)
         @ui.list = list
@@ -164,7 +164,7 @@ module PodPicr
       A::ProgramInited
     end
 
-    private def st_programs_monitor
+    private def program_mon_state
       if (ui = @ui)
         res = ui.programs_monitor
         if (res.is_a?({action: String, value: String}))
@@ -184,7 +184,7 @@ module PodPicr
       A::NoAction
     end
 
-    private def st_play_program
+    private def program_play_state
       audio = Audio.new
       keys = @ui.keys
       win = @ui.display.window
@@ -194,7 +194,7 @@ module PodPicr
       A::Back
     end
 
-    private def st_exit
+    private def exit_state
       @ui.try { |ui| ui.close }
       NCurses.end_win
       puts "done"
