@@ -42,7 +42,7 @@ module PodPicr
         when "selected"
           @display.redraw(res)
           @station = @list.stations[@display.selected]
-          return {action: "selected", station: @station}
+          return {action: "select", station: @station}
         when "char"
           case res[:value]
           when "q", "Q"
@@ -63,8 +63,7 @@ module PodPicr
           @display.redraw(res)
           @title = @display.list[@display.selected]
           xml_link = @list.xmlUrl(@title)[0]
-          return {action: "xml_link",
-                  xmlUrl: xml_link}
+          return {action: "select", xmlUrl: xml_link}
         when "char"
           case res[:value]
           when "q", "Q"
@@ -91,8 +90,7 @@ module PodPicr
         when "selected"
           @display.redraw(res)
           program = @display.list[@display.selected]
-          return {action: "select",
-                  value:  @display.selected.to_s}
+          return {action: "select", value: @display.selected.to_s}
         when "char"
           case res[:value]
           when "q", "Q"

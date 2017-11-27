@@ -175,7 +175,7 @@ module PodPicr
         res = ui.stations_monitor
         if (res.is_a?({action: String, station: String}))
           case res[:action]
-          when "selected"
+          when "select"
             @title = res[:station]
             return :station_selected
           when "cancel"
@@ -201,7 +201,7 @@ module PodPicr
         res = ui.titles_monitor
         if (res.is_a?({action: String, xmlUrl: String}))
           case res[:action]
-          when "xml_link"
+          when "select"
             @xmlUrl = res[:xmlUrl]
             return :title_selected
           when "cancel"
