@@ -8,14 +8,13 @@ module PodPicr
 
     def initialize
       @page = Page.new
-      @back_page = Page.new
       @list = List.new
-      @back_list = [] of String
       @display = Display.new(@page)
       @keys = Keys.new(@display.window)
       @station = ""
       @title = ""
       @display_stack = Deque(Display).new
+      @rss = RSS.new
     end
 
     def close
@@ -30,26 +29,16 @@ module PodPicr
         @display.page = @page
         @display.list = @list.stations
       when "shows"
-        backup
         @page.name = "Shows - " + "(#{@station})"
         @display.page = @page
         @display.list = @list.shows(kind[:value])
-      end
-      @display.draw_list
-    end
-
-    def resume_list(kind)
-      case (kind[:type])
-      when "stations"
-        backup
-        @page.name = "Stations"
+      when "episodes"
+        @page.name = "Episodes - (" + @station + ": " + @title + ")"
         @display.page = @page
-        @display.list = @list.stations
-      when "shows"
-        backup
-        @page.name = "Shows - " + "(#{@station})"
-        @display.page = @page
-        @display.list = @list.shows(kind[:value])
+        @rss.parse kind[:value]
+        @display.list = @rss.results("title")
+      else
+        raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
       end
       @display.draw_list
     end
@@ -59,12 +48,13 @@ module PodPicr
       @display.draw_list
     end
 
-    def episodes_init(rss)
-      backup
-      @page.name = "Episodes - (" + @station + ": " + @title + ")"
-      @display.page = @page
-      @display.list = rss.results("title")
-      @display.draw_list
+    def episode_info
+      urls = @rss.results("url")
+      lengths = @rss.results("length")
+      idx = @display.selected.to_i
+      url = urls[idx]
+      length = lengths[idx].to_i64
+      {url: url, length: length}
     end
 
     def stations_monitor
@@ -79,7 +69,6 @@ module PodPicr
           @station = @list.stations[@display.selected]
           return {action: "select", station: @station}
         when "back"
-          recall
           return {action: "back", station: ""}
         end
       end
@@ -114,23 +103,9 @@ module PodPicr
           program = @display.list[@display.selected]
           return {action: "select", value: @display.selected.to_s}
         when "back"
-          #          @page = @back_page.dup
-          #          @list = @back_list.dup
-          recall
           return {action: "back", value: ""}
         end
       end
-    end
-
-    private def backup
-      #      @back_page = @display.page
-      #      @back_list = @display.list
-    end
-
-    private def recall
-      #      @display.page = @back_page
-      #      @display.list = @back_list
-      #      @display.draw_list
     end
 
     private def valid_response?(response)

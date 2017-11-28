@@ -44,15 +44,11 @@ module PodPicr
 
       @state = State.new @user_state
       @list = List.new
-      @rss = RSS.new
-      @episode_url = ""
-      @length = 0_i64
       @show = ""
-      @xmlUrl = ""
+      @xml_url = ""
       @ui = UI.new
       @audio = Audio.new
-      win = @ui.display.window
-      @audio.win = win
+      @audio.win = @ui.display.window
     end
 
     def run
@@ -110,7 +106,8 @@ module PodPicr
     end
 
     private def station_init_state
-      station_init
+      @ui.list = @list
+      @ui.init_list({type: "stations", value: ""})
       A::StationInit
     end
 
@@ -148,7 +145,7 @@ module PodPicr
     end
 
     private def episode_init_state
-      episode_init
+      @ui.init_list({type: "episodes", value: @xml_url})
       A::EpisodeInit
     end
 
@@ -175,11 +172,6 @@ module PodPicr
       sleep(0.001)
     end
 
-    private def station_init
-      @ui.list = @list
-      @ui.init_list({type: "stations", value: ""})
-    end
-
     private def station_select
       res = @ui.stations_monitor
       if (res.is_a?({action: String, station: String}))
@@ -199,7 +191,7 @@ module PodPicr
       if (res.is_a?({action: String, xmlUrl: String}))
         case res[:action]
         when "select"
-          @xmlUrl = res[:xmlUrl]
+          @xml_url = res[:xmlUrl]
           return :selected
         when "back"
           return :back
@@ -208,21 +200,11 @@ module PodPicr
       :no_action
     end
 
-    private def episode_init
-      @rss.parse(@xmlUrl)
-      @ui.episodes_init(@rss)
-    end
-
     private def episode_select
       res = @ui.episodes_monitor
       if (res.is_a?({action: String, value: String}))
         case res[:action]
         when "select"
-          urls = @rss.results("url")
-          lengths = @rss.results("length")
-          idx = res[:value].to_i
-          @episode_url = urls[idx]
-          @length = lengths[idx].to_i64
           return :selected
         when "back"
           return :back
@@ -234,7 +216,9 @@ module PodPicr
     private def episode_play
       @audio.stop if @audio.running?
       await_audio_stop
-      @audio.run @episode_url, @length
+      url = @ui.episode_info[:url]
+      length = @ui.episode_info[:length]
+      @audio.run url, length
     end
 
     private def await_audio_stop
