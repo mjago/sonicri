@@ -1,48 +1,26 @@
 module PodPicr
   class User
-    alias S = UserState
-    alias A = UserAction
-
-    @user_state : Array({st: S, res: A, to: S})
-    @states : Array({st: S, fn: Proc(A)})
+    #    @states : Array({st: S, fn: Proc(A)})
+    @states : Array(Tuple(S, Proc(A)))
 
     def initialize
-      @user_state = [
-        {st: S::Init, res: A::Init, to: S::ListAge},
-        {st: S::ListAge, res: A::ListAged, to: S::ListParse},
-        {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
-        {st: S::StationInit, res: A::StationInit, to: S::StationSelect},
-        {st: S::StationResume, res: A::StationResumed, to: S::StationSelect},
-        {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
-        {st: S::StationSelect, res: A::Exit, to: S::Exit},
-        {st: S::ShowInit, res: A::ShowInit, to: S::ShowSelect},
-        {st: S::ShowResume, res: A::ShowResumed, to: S::ShowSelect},
-        {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
-        {st: S::ShowSelect, res: A::Back, to: S::StationResume},
-        {st: S::EpisodeInit, res: A::EpisodeInit, to: S::EpisodeSelect},
-        {st: S::EpisodeSelect, res: A::EpisodeSelected, to: S::EpisodePlay},
-        {st: S::EpisodeSelect, res: A::Back, to: S::ShowResume},
-        {st: S::EpisodePlay, res: A::Back, to: S::EpisodeSelect},
-        {st: S::Exit, res: A::Exit, to: S::Exit},
-      ]
-
       @states = [
-        {st: S::Init, fn: ->init_state},
-        {st: S::ListAge, fn: ->list_age_state},
-        {st: S::ListParse, fn: ->list_parse_state},
-        {st: S::StationInit, fn: ->station_init_state},
-        {st: S::StationResume, fn: ->station_resume_state},
-        {st: S::StationSelect, fn: ->station_select_state},
-        {st: S::ShowInit, fn: ->show_init_state},
-        {st: S::ShowResume, fn: ->show_resume_state},
-        {st: S::ShowSelect, fn: ->show_select_state},
-        {st: S::EpisodeInit, fn: ->episode_init_state},
-        {st: S::EpisodeSelect, fn: ->episode_select_state},
-        {st: S::EpisodePlay, fn: ->episode_play_state},
-        {st: S::Exit, fn: ->exit_state},
+        {S::Init, ->init_state},
+        {S::ListAge, ->list_age_state},
+        {S::ListParse, ->list_parse_state},
+        {S::StationInit, ->station_init_state},
+        {S::StationResume, ->station_resume_state},
+        {S::StationSelect, ->station_select_state},
+        {S::ShowInit, ->show_init_state},
+        {S::ShowResume, ->show_resume_state},
+        {S::ShowSelect, ->show_select_state},
+        {S::EpisodeInit, ->episode_init_state},
+        {S::EpisodeSelect, ->episode_select_state},
+        {S::EpisodePlay, ->episode_play_state},
+        {S::Exit, ->exit_state},
       ]
 
-      @state = State.new @user_state
+      @state = State.new UserStates
       @list = List.new
       @show = ""
       @xml_url = ""
@@ -62,10 +40,10 @@ module PodPicr
 
     private def process_state
       check = false
-      @states.each do |st|
-        if st[:st] == state
+      0.upto(@states.size) do |idx|
+        if @states[idx][0] == state
           check = true
-          ret = st[:fn].call
+          ret = @states[idx][1].call
           if ret.is_a? A
             action ret
             break

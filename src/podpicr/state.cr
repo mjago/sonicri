@@ -1,8 +1,5 @@
 module PodPicr
   class State
-    alias S = UserState
-    alias A = UserAction
-
     def initialize(@state_table : Array({st: S, res: A, to: S}))
       @queue = [] of A
       @state = @state_table[0][:st]
