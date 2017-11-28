@@ -44,9 +44,7 @@ module PodPicr
     end
 
     def stop
-      @io.flush
-      @dl.quit
-      @quit = true
+      quit
       sleep 0.3
       initialize
     end
