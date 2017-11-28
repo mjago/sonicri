@@ -29,16 +29,16 @@ module PodPicr
         @page.name = "Stations"
         @display.page = @page
         @display.list = @list.stations
-      when "episodes"
+      when "shows"
         backup
-        @page.name = "Programs - " + "(#{@station})"
+        @page.name = "Shows - " + "(#{@station})"
         @display.page = @page
-        @display.list = @list.episodes(kind[:value])
+        @display.list = @list.shows(kind[:value])
       end
       @display.draw_list
     end
 
-    def programs_init(rss)
+    def episodes_init(rss)
       backup
       @page.name = "Episodes - (" + @station + ": " + @title + ")"
       @display.page = @page
@@ -63,7 +63,7 @@ module PodPicr
       end
     end
 
-    def episodes_monitor
+    def shows_monitor
       response = @keys.check_input
       if valid_response? response
         case response[:action]
@@ -81,7 +81,7 @@ module PodPicr
       end
     end
 
-    def programs_monitor
+    def episodes_monitor
       response = @keys.check_input
       if valid_response? response
         case response[:action]

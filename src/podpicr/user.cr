@@ -12,15 +12,15 @@ module PodPicr
         {st: S::ListAge, res: A::ListAged, to: S::ListParse},
         {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
         {st: S::StationInit, res: A::StationInit, to: S::StationSelect},
-        {st: S::StationSelect, res: A::StationSelected, to: S::EpisodeInit},
+        {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
         {st: S::StationSelect, res: A::Exit, to: S::Exit},
+        {st: S::ShowInit, res: A::ShowInit, to: S::ShowSelect},
+        {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
+        {st: S::ShowSelect, res: A::Back, to: S::StationInit},
         {st: S::EpisodeInit, res: A::EpisodeInit, to: S::EpisodeSelect},
-        {st: S::EpisodeSelect, res: A::EpisodeSelected, to: S::ProgramInit},
-        {st: S::EpisodeSelect, res: A::Back, to: S::StationInit},
-        {st: S::ProgramInit, res: A::ProgramInit, to: S::ProgramSelect},
-        {st: S::ProgramSelect, res: A::ProgramSelected, to: S::ProgramPlay},
-        {st: S::ProgramSelect, res: A::Back, to: S::EpisodeInit},
-        {st: S::ProgramPlay, res: A::Back, to: S::ProgramSelect},
+        {st: S::EpisodeSelect, res: A::EpisodeSelected, to: S::EpisodePlay},
+        {st: S::EpisodeSelect, res: A::Back, to: S::ShowInit},
+        {st: S::EpisodePlay, res: A::Back, to: S::EpisodeSelect},
         {st: S::Exit, res: A::Exit, to: S::Exit},
       ]
 
@@ -30,20 +30,20 @@ module PodPicr
         {st: S::ListParse, fn: ->list_parse_state},
         {st: S::StationInit, fn: ->station_init_state},
         {st: S::StationSelect, fn: ->station_select_state},
+        {st: S::ShowInit, fn: ->show_init_state},
+        {st: S::ShowSelect, fn: ->show_select_state},
         {st: S::EpisodeInit, fn: ->episode_init_state},
         {st: S::EpisodeSelect, fn: ->episode_select_state},
-        {st: S::ProgramInit, fn: ->program_init_state},
-        {st: S::ProgramSelect, fn: ->program_select_state},
-        {st: S::ProgramPlay, fn: ->program_play_state},
+        {st: S::EpisodePlay, fn: ->episode_play_state},
         {st: S::Exit, fn: ->exit_state},
       ]
 
       @state = State.new @user_state
       @list = List.new
       @rss = RSS.new
-      @program_url = ""
+      @episode_url = ""
       @length = 0_i64
-      @episode = ""
+      @show = ""
       @xmlUrl = ""
       @ui = UI.new
       @audio = Audio.new
@@ -119,6 +119,20 @@ module PodPicr
       end
     end
 
+    private def show_init_state
+      show_init
+      A::ShowInit
+    end
+
+    private def show_select_state
+      case show_select
+      when :selected; A::ShowSelected
+      when :back    ; A::Back
+      else
+        A::NoAction
+      end
+    end
+
     private def episode_init_state
       episode_init
       A::EpisodeInit
@@ -133,22 +147,8 @@ module PodPicr
       end
     end
 
-    private def program_init_state
-      program_init
-      A::ProgramInit
-    end
-
-    private def program_select_state
-      case program_select
-      when :selected; A::ProgramSelected
-      when :back    ; A::Back
-      else
-        A::NoAction
-      end
-    end
-
-    private def program_play_state
-      program_play
+    private def episode_play_state
+      episode_play
       A::Back
     end
 
@@ -171,7 +171,7 @@ module PodPicr
       if (res.is_a?({action: String, station: String}))
         case res[:action]
         when "select"
-          @episode = res[:station]
+          @show = res[:station]
           return :selected
         when "back"
           return :back
@@ -180,12 +180,12 @@ module PodPicr
       :no_action
     end
 
-    private def episode_init
-      @ui.init_list({type: "episodes", value: "#{@episode}"})
+    private def show_init
+      @ui.init_list({type: "shows", value: "#{@show}"})
     end
 
-    private def episode_select
-      res = @ui.episodes_monitor
+    private def show_select
+      res = @ui.shows_monitor
       if (res.is_a?({action: String, xmlUrl: String}))
         case res[:action]
         when "select"
@@ -198,20 +198,20 @@ module PodPicr
       :no_action
     end
 
-    private def program_init
+    private def episode_init
       @rss.parse(@xmlUrl)
-      @ui.programs_init(@rss)
+      @ui.episodes_init(@rss)
     end
 
-    private def program_select
-      res = @ui.programs_monitor
+    private def episode_select
+      res = @ui.episodes_monitor
       if (res.is_a?({action: String, value: String}))
         case res[:action]
         when "select"
           urls = @rss.results("url")
           lengths = @rss.results("length")
           idx = res[:value].to_i
-          @program_url = urls[idx]
+          @episode_url = urls[idx]
           @length = lengths[idx].to_i64
           return :selected
         when "back"
@@ -221,10 +221,10 @@ module PodPicr
       :no_action
     end
 
-    private def program_play
+    private def episode_play
       @audio.stop if @audio.running?
       await_audio_stop
-      @audio.run @program_url, @length
+      @audio.run @episode_url, @length
     end
 
     private def await_audio_stop

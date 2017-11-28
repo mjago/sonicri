@@ -5,11 +5,11 @@ module PodPicr
     ListParse
     StationInit
     StationSelect
+    ShowInit
+    ShowSelect
     EpisodeInit
     EpisodeSelect
-    ProgramInit
-    ProgramSelect
-    ProgramPlay
+    EpisodePlay
     Exit
   end
 
@@ -21,10 +21,10 @@ module PodPicr
     StationInit
     Back
     StationSelected
+    ShowInit
+    ShowSelected
     EpisodeInit
     EpisodeSelected
-    ProgramInit
-    ProgramSelected
     Exit
   end
 end

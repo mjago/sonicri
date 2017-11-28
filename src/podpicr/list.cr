@@ -25,7 +25,7 @@ module PodPicr
       temp.uniq
     end
 
-    def episodes(station)
+    def shows(station)
       temp = [] of String
       @data.each do |d|
         if d.station == station
@@ -61,7 +61,7 @@ module PodPicr
     def update
       Downloader.new.fetch(FileAddress, TEMP_LIST)
       @document = XML.parse(TEMP_LIST)
-      #      check_for_errors
+      # check_for_errors
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")
     end
 
