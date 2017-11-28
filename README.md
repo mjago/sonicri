@@ -1,6 +1,6 @@
 # PodPicr
 
-Podcast Picker
+Podcast Picker in Crystal
 
 ## Installation
 
