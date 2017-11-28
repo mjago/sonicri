@@ -39,10 +39,6 @@ module PodPicr
       @then = ::Time.now.epoch.to_i64
     end
 
-    def feed(url)
-      @mpg.new(nil)
-    end
-
     def stop
       quit
       sleep 0.3
@@ -53,22 +49,6 @@ module PodPicr
       @io.flush
       @dl.quit
       @quit = true
-    end
-
-    def io_write(slice : Bytes)
-      @io.pos = @io.size
-      @io.write(slice)
-    end
-
-    def io_read(slice)
-      @io.pos = @io_readpos
-      @io.read(slice)
-      @io_readpos = @io.pos.to_i64
-      slice
-    end
-
-    def io_bytes_count
-      @io.size - @io_readpos
     end
 
     def running?
@@ -84,6 +64,22 @@ module PodPicr
       fiber_decode_chunks
       fiber_play_chunks
       @running = true
+    end
+
+    private def io_write(slice : Bytes)
+      @io.pos = @io.size
+      @io.write(slice)
+    end
+
+    private def io_read(slice)
+      @io.pos = @io_readpos
+      @io.read(slice)
+      @io_readpos = @io.pos.to_i64
+      slice
+    end
+
+    private def io_bytes_count
+      @io.size - @io_readpos
     end
 
     private def set_audio_format
@@ -199,8 +195,8 @@ module PodPicr
     private def fiber_decode_chunks
       spawn do
         loop do
-          outsize = BUF_SIZE
           break if @quit
+          outsize = BUF_SIZE
           data = nil
           size = get_data_size
           unless size == 0
