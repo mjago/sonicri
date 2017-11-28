@@ -4,11 +4,11 @@ module PodPicr
     ListAge
     ListParse
     StationInit
-    StationSel
-    TitleInit
-    TitleSel
+    StationSelect
+    EpisodeInit
+    EpisodeSelect
     ProgramInit
-    ProgramSel
+    ProgramSelect
     ProgramPlay
     Exit
   end
@@ -20,11 +20,11 @@ module PodPicr
     ListParsed
     StationInit
     Back
-    StationSeld
-    TitleInit
-    TitleSeld
+    StationSelected
+    EpisodeInit
+    EpisodeSelected
     ProgramInit
-    ProgramSeld
+    ProgramSelected
     Exit
   end
 end

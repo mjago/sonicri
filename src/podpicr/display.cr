@@ -14,8 +14,8 @@ module PodPicr
     HIT_SPACE = 29
 
     getter window
-    setter page
     property list
+    property page
 
     def initialize(@page : Page)
       NCurses.init
@@ -80,6 +80,9 @@ module PodPicr
         end
       when "selected"
         select_item(act[:value])
+        #        draw_list
+        #        sleep 0.2
+        #        @page.selected = 0
       end
       draw_list
     end

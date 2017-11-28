@@ -25,7 +25,7 @@ module PodPicr
       temp.uniq
     end
 
-    def titles(station)
+    def episodes(station)
       temp = [] of String
       @data.each do |d|
         if d.station == station
