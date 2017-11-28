@@ -16,6 +16,7 @@ module PodPicr
     end
 
     def close
+      @keys.close
       @display.close
     end
 
@@ -43,11 +44,8 @@ module PodPicr
           @display.redraw(res)
           @station = @list.stations[@display.selected]
           return {action: "select", station: @station}
-        when "char"
-          case res[:value]
-          when "q", "Q"
-            return {action: "cancel", station: ""}
-          end
+        when "back"
+          return {action: "back", station: ""}
         end
       end
     end
@@ -63,11 +61,8 @@ module PodPicr
           @title = @display.list[@display.selected]
           xml_link = @list.xmlUrl(@title)[0]
           return {action: "select", xmlUrl: xml_link}
-        when "char"
-          case res[:value]
-          when "q", "Q"
-            return {action: "cancel", xmlUrl: ""}
-          end
+        when "back"
+          return {action: "back", xmlUrl: ""}
         end
       end
     end
@@ -89,11 +84,8 @@ module PodPicr
           @display.redraw(res)
           program = @display.list[@display.selected]
           return {action: "select", value: @display.selected.to_s}
-        when "char"
-          case res[:value]
-          when "q", "Q"
-            return {action: "cancel", value: ""}
-          end
+        when "back"
+          return {action: "back", value: ""}
         end
       end
     end

@@ -113,7 +113,7 @@ module PodPicr
     private def station_sel_state
       case station_sel
       when :station_selected; A::StationSeld
-      when :cancelled       ; A::Exit
+      when :back            ; A::Exit
       else
         A::NoAction
       end
@@ -127,7 +127,7 @@ module PodPicr
     private def title_sel_state
       case title_sel
       when :title_selected; A::TitleSeld
-      when :cancelled     ; A::Back
+      when :back          ; A::Back
       else
         A::NoAction
       end
@@ -141,7 +141,7 @@ module PodPicr
     private def program_sel_state
       case program_sel
       when :program_selected; A::ProgramSeld
-      when :cancelled       ; A::Back
+      when :back            ; A::Back
       else
         A::NoAction
       end
@@ -178,8 +178,8 @@ module PodPicr
           when "select"
             @title = res[:station]
             return :station_selected
-          when "cancel"
-            return :cancelled
+          when "back"
+            return :back
           end
         end
       end
@@ -204,8 +204,8 @@ module PodPicr
           when "select"
             @xmlUrl = res[:xmlUrl]
             return :title_selected
-          when "cancel"
-            return :cancelled
+          when "back"
+            return :back
           end
         end
       end
@@ -234,8 +234,8 @@ module PodPicr
             @program_url = urls[idx]
             @length = lengths[idx].to_i64
             return :program_selected
-          when "cancel"
-            return :cancelled
+          when "back"
+            return :back
           end
         end
       end
