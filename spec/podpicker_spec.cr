@@ -1,9 +1,9 @@
 require "./spec_helper"
 
-describe PodPicr do
+describe "PodPicr tests go here!" do
   # TODO: Write tests
 
-  it "works" do
+  it "pretend it works for now" do
     true.should eq(true)
   end
 end
