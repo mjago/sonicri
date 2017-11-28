@@ -15,6 +15,7 @@ module PodPicr
       @keys = Keys.new(@display.window)
       @station = ""
       @title = ""
+      @display_stack = Deque(Display).new
     end
 
     def close
@@ -23,6 +24,21 @@ module PodPicr
     end
 
     def init_list(kind)
+      case (kind[:type])
+      when "stations"
+        @page.name = "Stations"
+        @display.page = @page
+        @display.list = @list.stations
+      when "shows"
+        backup
+        @page.name = "Shows - " + "(#{@station})"
+        @display.page = @page
+        @display.list = @list.shows(kind[:value])
+      end
+      @display.draw_list
+    end
+
+    def resume_list(kind)
       case (kind[:type])
       when "stations"
         backup
@@ -35,6 +51,11 @@ module PodPicr
         @display.page = @page
         @display.list = @list.shows(kind[:value])
       end
+      @display.draw_list
+    end
+
+    def resume
+      @display = @display_stack.pop
       @display.draw_list
     end
 
@@ -53,6 +74,7 @@ module PodPicr
         when "selection"
           @display.redraw(response)
         when "selected"
+          @display_stack.push @display.dup
           @display.redraw(response)
           @station = @list.stations[@display.selected]
           return {action: "select", station: @station}
@@ -70,12 +92,12 @@ module PodPicr
         when "selection"
           @display.redraw(response)
         when "selected"
+          @display_stack.push @display.dup
           @display.redraw(response)
           @title = @display.list[@display.selected]
           xml_link = @list.xmlUrl(@title)[0]
           return {action: "select", xmlUrl: xml_link}
         when "back"
-          recall
           return {action: "back", xmlUrl: ""}
         end
       end

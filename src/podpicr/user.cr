@@ -12,14 +12,16 @@ module PodPicr
         {st: S::ListAge, res: A::ListAged, to: S::ListParse},
         {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
         {st: S::StationInit, res: A::StationInit, to: S::StationSelect},
+        {st: S::StationResume, res: A::StationResumed, to: S::StationSelect},
         {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
         {st: S::StationSelect, res: A::Exit, to: S::Exit},
         {st: S::ShowInit, res: A::ShowInit, to: S::ShowSelect},
+        {st: S::ShowResume, res: A::ShowResumed, to: S::ShowSelect},
         {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
-        {st: S::ShowSelect, res: A::Back, to: S::StationInit},
+        {st: S::ShowSelect, res: A::Back, to: S::StationResume},
         {st: S::EpisodeInit, res: A::EpisodeInit, to: S::EpisodeSelect},
         {st: S::EpisodeSelect, res: A::EpisodeSelected, to: S::EpisodePlay},
-        {st: S::EpisodeSelect, res: A::Back, to: S::ShowInit},
+        {st: S::EpisodeSelect, res: A::Back, to: S::ShowResume},
         {st: S::EpisodePlay, res: A::Back, to: S::EpisodeSelect},
         {st: S::Exit, res: A::Exit, to: S::Exit},
       ]
@@ -29,8 +31,10 @@ module PodPicr
         {st: S::ListAge, fn: ->list_age_state},
         {st: S::ListParse, fn: ->list_parse_state},
         {st: S::StationInit, fn: ->station_init_state},
+        {st: S::StationResume, fn: ->station_resume_state},
         {st: S::StationSelect, fn: ->station_select_state},
         {st: S::ShowInit, fn: ->show_init_state},
+        {st: S::ShowResume, fn: ->show_resume_state},
         {st: S::ShowSelect, fn: ->show_select_state},
         {st: S::EpisodeInit, fn: ->episode_init_state},
         {st: S::EpisodeSelect, fn: ->episode_select_state},
@@ -110,6 +114,11 @@ module PodPicr
       A::StationInit
     end
 
+    private def station_resume_state
+      @ui.resume
+      A::StationResumed
+    end
+
     private def station_select_state
       case station_select
       when :selected; A::StationSelected
@@ -120,8 +129,13 @@ module PodPicr
     end
 
     private def show_init_state
-      show_init
+      @ui.init_list({type: "shows", value: "#{@show}"})
       A::ShowInit
+    end
+
+    private def show_resume_state
+      @ui.resume
+      A::ShowResumed
     end
 
     private def show_select_state
@@ -178,10 +192,6 @@ module PodPicr
         end
       end
       :no_action
-    end
-
-    private def show_init
-      @ui.init_list({type: "shows", value: "#{@show}"})
     end
 
     private def show_select

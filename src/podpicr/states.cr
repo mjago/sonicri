@@ -4,8 +4,10 @@ module PodPicr
     ListAge
     ListParse
     StationInit
+    StationResume
     StationSelect
     ShowInit
+    ShowResume
     ShowSelect
     EpisodeInit
     EpisodeSelect
@@ -19,9 +21,11 @@ module PodPicr
     ListAged
     ListParsed
     StationInit
+    StationResumed
     Back
     StationSelected
     ShowInit
+    ShowResumed
     ShowSelected
     EpisodeInit
     EpisodeSelected
