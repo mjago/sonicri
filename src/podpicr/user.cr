@@ -1,24 +1,22 @@
 module PodPicr
   class User
-    #    @states : Array({st: S, fn: Proc(A)})
-    @states : Array(Tuple(S, Proc(A)))
+    @states : Hash(S, Proc(A))
 
     def initialize
-      @states = [
-        {S::Init, ->init_state},
-        {S::ListAge, ->list_age_state},
-        {S::ListParse, ->list_parse_state},
-        {S::StationInit, ->station_init_state},
-        {S::StationResume, ->station_resume_state},
-        {S::StationSelect, ->station_select_state},
-        {S::ShowInit, ->show_init_state},
-        {S::ShowResume, ->show_resume_state},
-        {S::ShowSelect, ->show_select_state},
-        {S::EpisodeInit, ->episode_init_state},
-        {S::EpisodeSelect, ->episode_select_state},
-        {S::EpisodePlay, ->episode_play_state},
-        {S::Exit, ->exit_state},
-      ]
+      @states =
+        {S::Init          => ->init_state,
+         S::ListAge       => ->list_age_state,
+         S::ListParse     => ->list_parse_state,
+         S::StationInit   => ->station_init_state,
+         S::StationResume => ->station_resume_state,
+         S::StationSelect => ->station_select_state,
+         S::ShowInit      => ->show_init_state,
+         S::ShowResume    => ->show_resume_state,
+         S::ShowSelect    => ->show_select_state,
+         S::EpisodeInit   => ->episode_init_state,
+         S::EpisodeSelect => ->episode_select_state,
+         S::EpisodePlay   => ->episode_play_state,
+         S::Exit          => ->exit_state}
 
       @state = State.new UserStates
       @list = List.new
@@ -31,32 +29,27 @@ module PodPicr
 
     def run
       loop do
-        process_state
+        process_user_state
         do_events()
       end
     end
 
     # private
 
-    private def process_state
-      check = false
-      0.upto(@states.size) do |idx|
-        if @states[idx][0] == state
-          check = true
-          ret = @states[idx][1].call
-          if ret.is_a? A
-            action ret
-            break
-          else
-            raise "Error: Invalid action (#{ret}) in User#process_state!"
-          end
-        end
+    private def process_user_state
+      if stproc = @states[@state.state]?
+        call_state stproc
+      else
+        raise "state proc is nil in User#process_state"
       end
-      raise "Error: invalid state (#{state}) in User#process_state!" unless check
     end
 
-    private def state
-      @state.state
+    private def call_state(state_proc)
+      ret = state_proc.call
+      unless ret.is_a? A
+        raise "Error: Invalid action (#{ret}) in User#process_state!"
+      end
+      action ret
     end
 
     private def action(act : A)

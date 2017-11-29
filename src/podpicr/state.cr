@@ -18,7 +18,7 @@ module PodPicr
           end
         end
       end
-      raise("Error: state (#{@state}) doesn't exist in StateTable!") unless check
+      raise("Error in State#state: state (#{@state}) doesn't exist in StateTable!") unless check
       @state
     end
 
