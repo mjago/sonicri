@@ -57,7 +57,7 @@ module PodPicr
 
     def run(addr, @length = length)
       io = IO::Memory.new
-      redir = @dl.get_redirect(addr)
+      redir = @dl.follow_redirects(addr)
       @mpg.open_feed
       fiber_get_chunks(redir)
       fiber_update_display

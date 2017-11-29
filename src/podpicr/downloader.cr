@@ -75,18 +75,17 @@ module PodPicr
       false
     end
 
-    def get_redirect(addr)
+    def follow_redirects(addr)
       location = ""
-
       HTTP::Client.get(addr) do |response|
-        unless response.status_code == 302
-          raise "Error: Not redirect response (#{response.status_code}) in #get_redirect()"
+        unless response.status_code == 302 || response.status_code == 301
+          return addr
         end
         if response.headers["Location"]
           location = response.headers["Location"]
         end
       end
-      return location
+      return follow_redirects(location)
     end
 
     def get_chunks(redir : String)
