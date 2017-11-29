@@ -4,10 +4,11 @@ require "file_utils"
 
 module PodPicr
   class List
-    TEMP_LIST   = "tmp.opml"
+    TEMP_LIST   = "temp.opml"
     DEBUG_LIST  = false
-    FileAddress = "http://www.bbc.co.uk/podcasts.opml"
-    OPML_File   = "podcasts.xml"
+    BbcOpmlAddr  = "http://www.bbc.co.uk/podcasts.opml"
+    TwitOpmlAddr = "http://feeds.twit.tv/twitshows.opml"
+    OPML_File = "temp.xml"
 
     # FileAddress = "http://feeds.twit.tv/twitshows.opml"
 
@@ -15,6 +16,8 @@ module PodPicr
       @data = [] of ListStruct
       @selected_idx = 0
       @results = {} of String => Array(String)
+      @station = ""
+      @twit = false
     end
 
     def stations
@@ -59,32 +62,89 @@ module PodPicr
     end
 
     def update
-      Downloader.new.fetch(FileAddress, TEMP_LIST)
+      # todo
+    end
+
+    def update(addr)
+      Downloader.new.fetch(addr, TEMP_LIST)
       @document = XML.parse(TEMP_LIST)
       # check_for_errors
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")
     end
 
+    def parse
+      # bbc
+      prepare_station_struct
+      @twit = false
+      update BbcOpmlAddr
+      parse_bbc
+
+      # twit
+      @twit = true
+      update TwitOpmlAddr
+      parse_twit
+
+      @twit = true
+ #     update "http://recap.ltd.uk/podcasting/opml/directory1.opml"
+      parse_misc
+
+      sort_stations
+    end
+
     # parse OPML file
     # Extract each outline and store in @data array
     # Sort @data array by station alphabetically
-    def parse
+    def parse_bbc
       parse_OPML_local(OPML_File)
       document = @document.not_nil!
       parse_title(document)
-      parse_date_modified(document)
+#      parse_date_modified(document)
       body = parse_body(document)
       outlines = parse_outlines(body)
       outlines.each do |outline|
         outline_set = parse_program(outline)
         outline_set.each do |st|
-          clear_station_results
+#          prepare_station_struct
           extract_program_attrs(st)
           store_station_data(st)
           puts if DEBUG_LIST
         end
       end
-      sort_stations
+#      sort_stations
+    end
+
+    def parse_twit
+      @station = "Twit"
+      parse_OPML_local(OPML_File)
+      document = @document.not_nil!
+#      parse_title(document)
+      # parse_date_modified(document)
+      body = parse_body(document)
+      outlines = parse_outlines(body)
+      outlines.each do |outline|
+        puts "outline = #{outline}".colorize(:red) if DEBUG_LIST
+        # prepare_station_struct
+        extract_program_attrs(outline)
+        store_station_data(outline)
+        puts if DEBUG_LIST
+      end
+      # sort_stations
+    end
+
+    def parse_misc
+      @station = "Miscellaneous"
+      parse_OPML_local("miscellaneous.opml")
+      document = @document.not_nil!
+      body = parse_body(document)
+      outlines = parse_outlines(body)
+      outlines.each do |outline|
+        puts "outline = #{outline}".colorize(:red) if DEBUG_LIST
+        # prepare_station_struct
+        extract_program_attrs(outline)
+        store_station_data(outline)
+        puts if DEBUG_LIST
+      end
+      # sort_stations
     end
 
     def selected
@@ -131,7 +191,7 @@ module PodPicr
     end
 
     private def parse_outlines(doc)
-      doc.xpath_nodes("outline")
+      doc.xpath_nodes("./outline")
     end
 
     private def parse_station(doc)
@@ -148,7 +208,11 @@ module PodPicr
       doc.xpath_nodes("outline/#{attr}")
     end
 
-    private def clear_station_results
+    private def parse_twit_prog_attribute(doc, attr)
+      doc.xpath_nodes("./#{attr}")
+    end
+
+    private def prepare_station_struct
       ListStruct.names.each do |attr|
         @results[attr] = [] of String
       end
@@ -157,7 +221,11 @@ module PodPicr
 
     private def extract_program_attrs(prog)
       ListStruct.names.each do |attr|
-        prog_attr = parse_prog_attribute(prog, attr)
+        if twit = @twit
+          prog_attr = parse_twit_prog_attribute(prog, attr)
+        else
+          prog_attr = parse_prog_attribute(prog, attr)
+        end
         if prog_attr
           prog_attr.each do |at|
             @results[attr] << at.text.to_s
@@ -169,11 +237,17 @@ module PodPicr
     end
 
     private def store_station_data(st)
-      station = parse_station(st)
+
+      #      return if @station == ""
+
       @results["@description"].size.times do |count|
         puts "#{(count + 1).colorize(:cyan)}:" if DEBUG_LIST
         hash = {} of String => String
-        hash["station"] = station
+        if twit = @twit
+          hash["station"] = @station
+        else
+          hash["station"] = parse_station(st)
+        end
         ListStruct.names.each do |attr|
           unless @results[attr].empty?
             res = @results[attr].shift

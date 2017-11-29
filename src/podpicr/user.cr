@@ -28,6 +28,9 @@ module PodPicr
     end
 
     def run
+ #     @list.update
+#      @list.parse
+#      do_exit
       loop do
         process_user_state
         do_events()
@@ -188,6 +191,7 @@ module PodPicr
       @audio.stop if @audio.running?
       await_audio_stop
       url = @ui.episode_info[:url]
+
       length = @ui.episode_info[:length]
       @audio.run url, length
     end

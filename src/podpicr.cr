@@ -1,4 +1,4 @@
 require "./podpicr/*"
 
-pp = PodPicr::User.new
-pp.run
+ppr = PodPicr::User.new
+ppr.run
