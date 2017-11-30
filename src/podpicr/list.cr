@@ -4,13 +4,11 @@ require "file_utils"
 
 module PodPicr
   class List
-    TEMP_LIST   = "temp.opml"
-    DEBUG_LIST  = false
+    TEMP_LIST    = "temp.opml"
+    DEBUG_LIST   = false
     BbcOpmlAddr  = "http://www.bbc.co.uk/podcasts.opml"
     TwitOpmlAddr = "http://feeds.twit.tv/twitshows.opml"
-    OPML_File = "temp.xml"
-
-    # FileAddress = "http://feeds.twit.tv/twitshows.opml"
+    OPML_File    = "temp.xml"
 
     def initialize
       @data = [] of ListStruct
@@ -18,6 +16,22 @@ module PodPicr
       @results = {} of String => Array(String)
       @station = ""
       @twit = false
+    end
+
+    def parse
+      prepare_station_struct
+      update BbcOpmlAddr
+      parse_OPML_local(OPML_File)
+      do_parse
+      update TwitOpmlAddr
+      parse_OPML_local(OPML_File)
+      do_parse
+      update "http://www.cbc.ca/podcasting/podcasts.opml"
+      parse_OPML_local(OPML_File)
+      do_parse
+      parse_OPML_local("miscellaneous.opml")
+      do_parse
+      sort_stations
     end
 
     def stations
@@ -42,7 +56,7 @@ module PodPicr
       temp = [] of String
       @data.each do |d|
         if d.text == title
-          temp << d.xmlUrl
+          temp << d.url
         end
       end
       temp
@@ -72,80 +86,6 @@ module PodPicr
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")
     end
 
-    def parse
-      # bbc
-      prepare_station_struct
-      @twit = false
-      update BbcOpmlAddr
-      parse_bbc
-
-      # twit
-      @twit = true
-      update TwitOpmlAddr
-      parse_twit
-
-      @twit = true
- #     update "http://recap.ltd.uk/podcasting/opml/directory1.opml"
-      parse_misc
-
-      sort_stations
-    end
-
-    # parse OPML file
-    # Extract each outline and store in @data array
-    # Sort @data array by station alphabetically
-    def parse_bbc
-      parse_OPML_local(OPML_File)
-      document = @document.not_nil!
-      parse_title(document)
-#      parse_date_modified(document)
-      body = parse_body(document)
-      outlines = parse_outlines(body)
-      outlines.each do |outline|
-        outline_set = parse_program(outline)
-        outline_set.each do |st|
-#          prepare_station_struct
-          extract_program_attrs(st)
-          store_station_data(st)
-          puts if DEBUG_LIST
-        end
-      end
-#      sort_stations
-    end
-
-    def parse_twit
-      @station = "Twit"
-      parse_OPML_local(OPML_File)
-      document = @document.not_nil!
-#      parse_title(document)
-      # parse_date_modified(document)
-      body = parse_body(document)
-      outlines = parse_outlines(body)
-      outlines.each do |outline|
-        puts "outline = #{outline}".colorize(:red) if DEBUG_LIST
-        # prepare_station_struct
-        extract_program_attrs(outline)
-        store_station_data(outline)
-        puts if DEBUG_LIST
-      end
-      # sort_stations
-    end
-
-    def parse_misc
-      @station = "Miscellaneous"
-      parse_OPML_local("miscellaneous.opml")
-      document = @document.not_nil!
-      body = parse_body(document)
-      outlines = parse_outlines(body)
-      outlines.each do |outline|
-        puts "outline = #{outline}".colorize(:red) if DEBUG_LIST
-        # prepare_station_struct
-        extract_program_attrs(outline)
-        store_station_data(outline)
-        puts if DEBUG_LIST
-      end
-      # sort_stations
-    end
 
     def selected
       @data[@selected_idx]
@@ -162,54 +102,139 @@ module PodPicr
       end
     end
 
+    private def find_head(root)
+      root.children.each do |child|
+        if child.name == "head"
+          return child
+        end
+      end
+      raise "Couldn't find head!"
+    end
+
+    private def find_body(root)
+      root.children.each do |child|
+        if child.name == "body"
+          return child
+        end
+      end
+      raise "Couldn't find body!"
+    end
+
+    private def get_title(head)
+      head.children.select(&.element?).each do |child|
+        return child.content
+      end
+      raise "Couldn't find title"
+    end
+
+    private def find_outline_depth(node, depth = 0)
+      if node.children.each do |x|
+           if x.name == "outline"
+             return find_outline_depth(x, depth + 1)
+           end
+         end
+      end
+      depth
+    end
+
+    private def parse_programs(node, station)
+      programs = [] of Hash(String, String)
+      node.children.each do |x|
+        if x.name == "outline"
+          program = {"station" => station}
+          count = 0
+          x.attributes.each do |attr|
+            case attr.name
+            when "text", "description"
+              count += 1
+              program[attr.name] = attr.content
+            when "url", "xmlUrl"
+              count += 1
+              program["url"] = attr.content
+            end
+          end
+          if count == 3
+            programs << program
+          end
+        end
+      end
+      programs
+    end
+
+    private def do_parse
+      stations = [] of Hash(String, String)
+      doc = @document.not_nil!
+      opml = doc.root.not_nil!
+      head = find_head opml
+      title = get_title head
+      body = find_body opml
+      depth = find_outline_depth body
+      case depth
+      when 1
+        programs = parse_programs(body, title)
+        programs.each do |prog|
+          stations << prog
+        end
+      when 3
+        station = ""
+        title_outline = nil
+        body.children.each do |x|
+          if x.name == "outline"
+            x.children.each do |y|
+              if y.name == "outline"
+                y.attributes.each do |attr|
+                  if attr.name == "text"
+                    unless attr.content.strip == ""
+                      station = attr.content
+                      programs = parse_programs(y, station)
+                      programs.each do |prog|
+                        stations << prog
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+        station = ""
+      when 4
+        title_outline = nil
+        body.children.each do |x|
+          if x.name == "outline"
+            x.children.each do |y|
+              if y.name == "outline"
+                y.attributes.each do |attr|
+                  if attr.name == "text"
+                    unless attr.content.strip == ""
+                      station = attr.content
+                      y.children.each do |z|
+                        if z.name == "outline"
+                          programs = parse_programs(z, station)
+                          programs.each do |prog|
+                            stations << prog
+                          end
+                        end
+                      end
+                      programs = parse_programs(y, station)
+                      programs.each do |prog|
+                        stations << prog
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+      stations.each { |station| assign_data(station) }
+    end
+
     private def parse_OPML_local(file)
       list = File.open(file, "r")
       @document = XML.parse(list)
       check_for_errors
-    end
-
-    private def xpath_parse_first(doc, str)
-      doc.xpath_nodes(str).first
-    end
-
-    private def parse_title(doc)
-      t = xpath_parse_first(doc, "opml/head/title")
-      t = t.children.first.text if t
-      puts "title: #{t}" if DEBUG_LIST
-      t
-    end
-
-    private def parse_date_modified(doc)
-      dm = xpath_parse_first(doc, "opml/head/dateModified")
-      dm.children.first.text if dm
-      puts "date_modified: #{dm}" if DEBUG_LIST
-      dm
-    end
-
-    private def parse_body(doc)
-      xpath_parse_first(doc, "opml/body")
-    end
-
-    private def parse_outlines(doc)
-      doc.xpath_nodes("./outline")
-    end
-
-    private def parse_station(doc)
-      st = doc.xpath_nodes("./@text")[0].text
-      puts "station: #{st}".colorize(:cyan) if DEBUG_LIST
-      st
-    end
-
-    private def parse_program(doc)
-      doc.xpath_nodes("./outline")
-    end
-
-    private def parse_prog_attribute(doc, attr)
-      doc.xpath_nodes("outline/#{attr}")
-    end
-
-    private def parse_twit_prog_attribute(doc, attr)
-      doc.xpath_nodes("./#{attr}")
     end
 
     private def prepare_station_struct
@@ -217,46 +242,6 @@ module PodPicr
         @results[attr] = [] of String
       end
       puts ("#   " * 16).colorize(:cyan) if DEBUG_LIST
-    end
-
-    private def extract_program_attrs(prog)
-      ListStruct.names.each do |attr|
-        if twit = @twit
-          prog_attr = parse_twit_prog_attribute(prog, attr)
-        else
-          prog_attr = parse_prog_attribute(prog, attr)
-        end
-        if prog_attr
-          prog_attr.each do |at|
-            @results[attr] << at.text.to_s
-          end
-        else
-          @results[attr] << ""
-        end
-      end
-    end
-
-    private def store_station_data(st)
-
-      #      return if @station == ""
-
-      @results["@description"].size.times do |count|
-        puts "#{(count + 1).colorize(:cyan)}:" if DEBUG_LIST
-        hash = {} of String => String
-        if twit = @twit
-          hash["station"] = @station
-        else
-          hash["station"] = parse_station(st)
-        end
-        ListStruct.names.each do |attr|
-          unless @results[attr].empty?
-            res = @results[attr].shift
-            puts "#{attr[1..-1].capitalize.colorize(:green)}: #{(res).colorize(:yellow)}" if DEBUG_LIST
-            hash[attr[1..-1]] = res
-          end
-        end
-        assign_data(hash)
-      end
     end
 
     # Sort @data array by station alphabetically

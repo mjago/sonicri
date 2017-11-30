@@ -1,28 +1,23 @@
 module PodPicr
   struct ListStruct
-    property station, text, description, version
-    property xmlUrl, htmlUrl
+    property station, text, description, url
 
     def initialize
       @station = ""
       @text = ""
       @description = ""
-      @version = ""
-      @xmlUrl = ""
-      @htmlUrl = ""
+      @url = ""
     end
 
     def self.names
-      %w[@text @description @version @xmlUrl @htmlUrl]
+      %w[@text @description @url]
     end
 
     def assign(hash : Hash(String, String))
       @station = hash["station"]
       @text = hash["text"]
       @description = hash["description"]
-      @version = hash["version"]
-      @xmlUrl = hash["xmlUrl"]
-      @htmlUrl = hash["htmlUrl"]
+      @url = hash["url"]
     end
   end
 end

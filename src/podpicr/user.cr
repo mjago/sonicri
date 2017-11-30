@@ -28,9 +28,9 @@ module PodPicr
     end
 
     def run
- #     @list.update
-#      @list.parse
-#      do_exit
+      #     @list.update
+      #      @list.parse
+      #      do_exit
       loop do
         process_user_state
         do_events()

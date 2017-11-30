@@ -44,7 +44,7 @@ module PodPicr
         result["title"] = parse_item_title(item)
         result["link"] = parse_item_link(item)
         result["description"] = parse_item_description(item)
-#        result["summary"] = parse_item_i_summary(item) || ""
+        #        result["summary"] = parse_item_i_summary(item) || ""
         result["pubdate"] = parse_item_pubdate(item)
         result["url"] = parse_item_url(item)
         result["length"] = parse_item_length(item)
