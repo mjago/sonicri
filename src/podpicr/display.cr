@@ -37,7 +37,9 @@ module PodPicr
       @window.with_color(HeadingColor) do
         @window.print(" " * ((@page.line_size) + 6))
         @window.move(0, (@page.line_size / 2) - 3)
-        @window.print("PodPicr")
+        @window.with_attr(:bold) do
+          @window.print("Pod Picr")
+        end
         @window.move(1, 0)
         @window.refresh
       end
@@ -46,8 +48,10 @@ module PodPicr
     def draw_title
       @window.with_color(TitleColor) do
         page_name = @page.name.size > 78 ? @page.name[0..74] + "...)" : @page.name
-        @window.print(" " * 6 + page_name)
-        @window.print(" " * (@page.line_size - page_name.size))
+        @window.with_attr(:bold) do
+          @window.print(" " * 6 + page_name)
+          @window.print(" " * (@page.line_size - page_name.size))
+        end
         @window.print("\n")
         @window.refresh
       end
@@ -106,8 +110,11 @@ module PodPicr
     end
 
     private def draw_line(line_num)
+      attributes = get_line_attributes(line_num)
       color = get_line_color(line_num)
-      draw_color_line(line_num, color)
+      @window.with_attr(attributes) do
+        draw_color_line(line_num, color)
+      end
     end
 
     private def get_line_color(line_num)
@@ -119,6 +126,16 @@ module PodPicr
           SelectionColor
         else
           NonSelectColor
+        end
+    end
+
+    private def get_line_attributes(line_num)
+      attributes =
+        case line_num
+        when @page.selected, @page.selection
+          :bold
+        else
+          :normal
         end
     end
 
