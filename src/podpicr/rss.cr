@@ -34,6 +34,7 @@ module PodPicr
       @results = [] of Hash(String, String)
       fetch(url)
       f = File.open(RSS_FILE)
+      return false if File.empty?(RSS_FILE)
       document = XML.parse(f)
       check_for_errors(document)
       title = parse_title(document)
@@ -48,15 +49,6 @@ module PodPicr
         result["length"] = parse_item_length(item)
         result["type"] = parse_item_type(item)
         @results << result
-        #  puts
-        #  puts "item_title       : #{result["title"]} "
-        #  puts "item_link        : #{result["link"]} "
-        #  puts "item_description : #{result["description"]} "
-        #  puts "item_summary     : #{result["summary"]} "
-        #  puts "item_pubdate     : #{result["pubdate"]} "
-        #  puts "item_url         : #{result["url"]} "
-        #  puts "item_length      : #{result["length"]} "
-        #  puts "item_type        : #{result["type"]} "
       end
       @results = @results.sort { |x, y| x["title"] <=> y["title"] }
       true

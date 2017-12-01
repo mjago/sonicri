@@ -16,8 +16,12 @@ module PodPicr
     end
 
     def fetch(file_address, dest_name)
-      HTTP::Client.get(file_address) do |response|
-        File.write(dest_name, response.body_io)
+      begin
+        HTTP::Client.get(file_address) do |response|
+          File.write(dest_name, response.body_io)
+        end
+      rescue
+        File.write(dest_name, "")
       end
     end
 

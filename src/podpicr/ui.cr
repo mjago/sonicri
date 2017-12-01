@@ -33,14 +33,19 @@ module PodPicr
         @display.page = @page
         @display.list = @list.shows(kind[:value])
       when "episodes"
-        @page.name = "Episodes - (" + @station + ": " + @title + ")"
-        @display.page = @page
-        @rss.parse kind[:value]
-        @display.list = @rss.results("title")
+        if @rss.parse kind[:value]
+          list = @rss.results("title")
+          @page.name = "Episodes - (" + @station + ": " + @title + ")"
+          @display.page = @page
+          @display.list = @rss.results("title")
+        else
+          return false
+        end
       else
         raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
       end
       @display.draw_list
+      true
     end
 
     def resume

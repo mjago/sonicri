@@ -28,6 +28,7 @@ module PodPicr
     ShowResumed
     ShowSelected
     EpisodeInit
+    EpisodeInitCancelled
     EpisodeSelected
     Exit
   end
@@ -48,6 +49,7 @@ module PodPicr
     {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
     {st: S::ShowSelect, res: A::Back, to: S::StationResume},
     {st: S::EpisodeInit, res: A::EpisodeInit, to: S::EpisodeSelect},
+    {st: S::EpisodeInit, res: A::EpisodeInitCancelled, to: S::ShowResume},
     {st: S::EpisodeSelect, res: A::EpisodeSelected, to: S::EpisodePlay},
     {st: S::EpisodeSelect, res: A::Back, to: S::ShowResume},
     {st: S::EpisodePlay, res: A::Back, to: S::EpisodeSelect},

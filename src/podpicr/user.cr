@@ -119,8 +119,11 @@ module PodPicr
     end
 
     private def episode_init_state
-      @ui.init_list({type: "episodes", value: @xml_url})
-      A::EpisodeInit
+      if @ui.init_list({type: "episodes", value: @xml_url})
+        A::EpisodeInit
+      else
+        A::EpisodeInitCancelled
+      end
     end
 
     private def episode_select_state
