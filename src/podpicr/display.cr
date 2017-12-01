@@ -84,9 +84,6 @@ module PodPicr
         end
       when "selected"
         select_item(act[:value])
-        #        draw_list
-        #        sleep 0.2
-        #        @page.selected = 0
       end
       draw_list
     end
