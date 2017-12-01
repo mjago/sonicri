@@ -31,6 +31,8 @@ module PodPicr
       do_parse
       parse_OPML_local("miscellaneous.opml")
       do_parse
+      parse_OPML_local("other.opml")
+      do_parse
       sort_stations
     end
 
@@ -85,7 +87,6 @@ module PodPicr
       # check_for_errors
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")
     end
-
 
     def selected
       @data[@selected_idx]

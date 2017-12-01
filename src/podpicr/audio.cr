@@ -6,12 +6,7 @@ require "time"
 
 module PodPicr
   class Audio
-    @win : NCurses::Window | Nil
-    @then : Int64
-    @length : Int64
-    @total_size : Int64
-    setter win
-
+    setter win : NCurses::Window | Nil
     include Libao
     include Libmpg123
 
@@ -23,7 +18,7 @@ module PodPicr
 
     def initialize
       @io_readpos = @done = @rate =
-        @length = @total_size = 0_i64
+      @total_size = 0_i64
       @running = @quit = false
       @bits = 0
       @mpg = Mp.new
@@ -36,7 +31,6 @@ module PodPicr
       @inslice = Bytes.new(BUF_SIZE)
       @auxslice = Bytes.new(BUF_SIZE)
       @ao_buf = Bytes.new(BUF_SIZE)
-      @then = ::Time.now.epoch.to_i64
     end
 
     def stop
@@ -55,7 +49,7 @@ module PodPicr
       @running
     end
 
-    def run(addr, @length = length)
+    def run(addr)
       io = IO::Memory.new
       redir = @dl.follow_redirects(addr)
       @mpg.open_feed
@@ -64,7 +58,7 @@ module PodPicr
       fiber_decode_chunks
       fiber_play_chunks
       @running = true
-    end
+      end
 
     private def io_write(slice : Bytes)
       @io.pos = @io.size
@@ -111,16 +105,6 @@ module PodPicr
       ::Time.now.epoch
     end
 
-    private def display(str)
-      if win = @win
-        win.move(INFO_POS_ROW, INFO_POS_COL)
-        win.print(str)
-        win.refresh
-      else
-        raise "Error: no Window!"
-      end
-    end
-
     private def display_buffering
       display("Buffering...              ")
     end
@@ -151,7 +135,7 @@ module PodPicr
     private def display_progress
       if win = @win
         if @total_size > 0_i64
-          win.move(INFO_POS_ROW, INFO_POS_COL)
+          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
           win.print(info_line)
           win.refresh
         end
@@ -161,7 +145,7 @@ module PodPicr
     end
 
     private def info_line
-      info = "Rate: #{@rate}/#{@bits}, Size: #{@total_size}, Length: #{@length}"
+      info = "Rate: #{@rate}/#{@bits}, Size: #{@total_size}"
       while info.size < INFO_LINE_LENGTH
         info += " "
       end
@@ -175,7 +159,6 @@ module PodPicr
       when LibMP::MP_Errors::MP_OK.value
         @ch_play.send(nil)
       when LibMP::MP_Errors::MP_NEED_MORE.value
-        quit if @total_size >= @length
       when LibMP::MP_Errors::MP_BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       else

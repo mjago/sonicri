@@ -55,14 +55,6 @@ module PodPicr
       if match.is_a?(Tuple(String, String, String))
         data_start, data_end, data_size = match
         @data_end = data_end.to_i
-        # puts "start #{data_start}"
-        # puts "end #{data_end} \r\n"
-        # puts "end - start: #{data_end.to_i - data_start.to_i}"
-        # puts "size #{data_size}"
-        # if @file_size > 0
-        #   puts "progress: #{(data_end.to_f / data_size.to_f) * 100.0}"
-        # end
-        # @chunk_start = data_end.to_i
         if data_size.to_i != @file_size
           @file_size = data_size.to_i
         end
@@ -90,10 +82,11 @@ module PodPicr
 
     def get_chunks(redir : String)
       channel = Channel(Bytes).new
-      chunk = Bytes.new(20000)
+      chunk = Bytes.new(@chunk_size)
       spawn do
-        range = "bytes=0-"
-        HTTP::Client.get(redir, headers: HTTP::Headers{"Range" => range}) do |io|
+        # range = "bytes=0-"
+        # HTTP::Client.get(redir, headers: HTTP::Headers{"Range" => range}) do |io|
+        HTTP::Client.get(redir) do |io|
           while !quit?
             count = io.body_io.read(chunk)
             quit if count == 0
@@ -101,7 +94,6 @@ module PodPicr
             @file.write(sized)
             channel.send(sized)
           end
-          #          break if quit?
         end
         STDERR.print "."
       end
@@ -111,58 +103,5 @@ module PodPicr
         yield chunk
       end
     end
-
-    #    def get_next_chunk(redir : String)
-    #      channel = Channel(Bytes).new
-    #      range = "bytes=#{@chunk_start}-#{@chunk_start + (@chunk_size)}"
-    #      spawn do
-    #        HTTP::Client.get(redir, headers: HTTP::Headers{"Range" => range}) do |response|
-    #          Fiber.yield
-    #          if response.status_code == 200
-    #            raise "Recieved response code 200"
-    #          else
-    #            unless response.status_code == 206
-    #              raise "Error: response code #{response.status_code}"
-    #            end
-    #          end
-    #          #          Fiber.yield
-    #          p response.headers
-    #          exit
-    #          finished?(response.headers["Content-Range"])
-    #          if s = response.body_io.peek
-    #            @file.write(s)
-    # #            puts "size : #{s.size} \r\n"
-    #            @chunk_start += s.size
-    #            unless @file_size == 0
-    #              if @chunk_start >= (@file_size.to_i - 1)
-    #                @complete = true
-    #              end
-    #            end
-    #            channel.send s
-    #          else
-    #            raise "Error Client body is nil!"
-    #          end
-    #        end
-    #      end
-    #      channel.receive
-    #    end
   end
 end
-
-# channel = Channel(Bytes).new
-# chunk = Bytes.new(20000)
-# spawn do
-#   range = "bytes=0-"
-#   HTTP::Client.get(redir, headers: HTTP::Headers{"Range" => range}) do |io|
-#     loop do
-#       count = io.body_io.read(chunk)
-#       break if count == 0
-#       sized = chunk[0, count]
-#       @file.write(sized)
-#       channel.send(sized)
-#     end
-#   end
-# end
-# while chunk = channel.receive
-#   yield chunk
-# end

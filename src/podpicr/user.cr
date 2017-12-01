@@ -191,9 +191,7 @@ module PodPicr
       @audio.stop if @audio.running?
       await_audio_stop
       url = @ui.episode_info[:url]
-
-      length = @ui.episode_info[:length]
-      @audio.run url, length
+      @audio.run url
     end
 
     private def await_audio_stop
