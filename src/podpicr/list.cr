@@ -29,9 +29,9 @@ module PodPicr
       update "http://www.cbc.ca/podcasting/podcasts.opml"
       parse_OPML_local(OPML_File)
       do_parse
-      parse_OPML_local("miscellaneous.opml")
+      parse_OPML_local("opml/miscellaneous.opml")
       do_parse
-      parse_OPML_local("other.opml")
+      parse_OPML_local("opml/other.opml")
       do_parse
       sort_stations
     end

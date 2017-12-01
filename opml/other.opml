@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>Favourites</title>
+    </head>
+    <body>
+      <outline description="IOT Podcast" text="IOT Podcast" xmlUrl="http://iotpodcast.com/feed/podcast" type="rss" />
+      <outline description="The Verve" text="The Verve" xmlUrl="https://www.theverge.com/rss/index.xml" type="rss" />
+      <outline description="Techcrunch" text="Techcrunch" xmlUrl="https://techcrunch.com/feed" type="rss" />
+      <outline description="Mashable" text="Mashable" xmlUrl="https://feeds.mashable.com/Mashable" type="rss" />
+      <outline description="Engadget" text="Engadget" xmlUrl="http://www.engadget.com/rss.xml" type="rss" />
+      <outline description="Floss Weekly" text="Floss Weekly" xmlUrl="http://feeds.twit.tv/floss.xml" type="rss" />
+    <outline description="" text="60-Second Earth" type="rss" xmlUrl="http://www.scientificamerican.com/podcast/sciam_podcast_i_earth.xml" htmlUrl="" />
+    <outline description="" text="Security Now!" type="rss" xmlUrl="http://leoville.tv/podcasts/sn.xml" htmlUrl="" />
+    <outline description="" text="99% Invisible" type="rss" xmlUrl="http://feeds.99percentinvisible.org/99percentinvisible" htmlUrl="" />
+    <outline description="" text="NPR: Planet Money Podcast" type="rss" xmlUrl="http://www.npr.org/rss/podcast.php?id=510289" htmlUrl="" />
+    <outline description="" text="WNYC's Radiolab" type="rss" xmlUrl="http://feeds.wnyc.org/radiolab" htmlUrl="" />
+    <outline description="" text="the memory palace" type="rss" xmlUrl="http://memorypalace.wm.wizzard.tv/rss" htmlUrl="" />
+    <outline description="" text="The Record" type="rss" xmlUrl="http://therecord.co/xml/rss.xml" htmlUrl="" />
+    <outline description="" text="Harmontown" xmlUrl="http://www.castmate.fm/feed.php?u=harmontownpodcast" htmlUrl="" />
+    <outline description="" text="Good Job, Brain!" type="rss" xmlUrl="http://goodjobbrain.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="fxguide: the vfx show" type="rss" xmlUrl="http://www.fxguide.com/category/vfxshow/feed/" htmlUrl="" />
+    <outline description="" text="Judge John Hodgman" type="rss" xmlUrl="http://feeds.feedburner.com/todayinthepast" />
+    <outline description="" text="Sawbones: A Marital Tour of Misguided Medicine" xmlUrl="http://sawbones.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Thrilling Adventure Hour" type="rss" xmlUrl="http://feeds.feedburner.com/ThrillingAdventureHour" htmlUrl="" />
+    <outline description="" text="Freakonomics Radio" type="rss" xmlUrl="http://feeds.feedburner.com/freakonomicsradio" htmlUrl="" />
+    <outline description="" text="More or Less: Behind the Stats" type="rss" xmlUrl="http://downloads.bbc.co.uk/podcasts/radio4/moreorless/rss.xml" htmlUrl="" />
+    <outline description="" text="The History of Britain" type="rss" xmlUrl="http://www.thehistoryofbritain.com/hob_audio.xml" htmlUrl="" />
+    <outline description="" text="The Dice Tower" type="rss" xmlUrl="http://dicetower.coolstuffinc.com/rss" htmlUrl="" />
+    <outline description="" text="Filmspotting" type="rss" xmlUrl="http://feeds.feedburner.com/cinecast" htmlUrl="" />
+    <outline description="" text="Alton Browncast" type="rss" xmlUrl="http://thebrowncast.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Stuff You Should Know" type="rss" xmlUrl="http://www.howstuffworks.com/podcasts/stuff-you-should-know.rss" htmlUrl="" />
+    <outline description="" text="Fugitive Waves" type="rss" xmlUrl="http://feeds.fugitivewaves.org/fugitivewaves" htmlUrl="" />
+    <outline description="" text="Radio Diaries" type="rss" xmlUrl="http://feed.radiodiaries.org/radio-diaries" htmlUrl="" />
+    <outline description="" text="Strangers" type="rss" xmlUrl="http://www.kcrw.com/podcast/show/sg" htmlUrl="" />
+    <outline description="" text="The Andy Daly Podcast Pilot Project" type="rss" xmlUrl="http://rss.earwolf.com/the-andy-daly-podcast-pilot-project" htmlUrl="" />
+    <outline description="" text="The Truth" type="rss" xmlUrl="http://feeds.feedburner.com/thetruthapm" htmlUrl="" />
+    <outline description="" text="Here's The Thing" type="rss" xmlUrl="http://feeds.feedburner.com/wnycheresthething" htmlUrl="" />
+    <outline description="" text="fxguide: the rc" type="rss" xmlUrl="http://www.fxguide.com/category/therc/feed/" htmlUrl="" />
+    <outline description="" text="Ludology" type="rss" xmlUrl="http://ludology.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Getting on" xmlUrl="http://gettingonwithju.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="International Waters" type="rss" xmlUrl="http://www.maximumfun.org/feeds/iw.xml" htmlUrl="" />
+    <outline description="" text="Kevin Pollak's Chat Show" type="rss" xmlUrl="http://rss.earwolf.com/kevin-pollaks-chat-show" htmlUrl="" />
+    <outline description="" text="Sklarbro Country" type="rss" xmlUrl="http://feeds.feedburner.com/sklarbrocountry" htmlUrl="" />
+    <outline description="" text="Dan Carlin's Hardcore History" xmlUrl="http://feeds.feedburner.com/dancarlin/history?format=xml" htmlUrl="" />
+    <outline description="" text="Board Game University" xmlUrl="http://boardgameuniversity.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="The Nerdist" type="rss" xmlUrl="http://nerdist.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Windows Weekly" type="rss" xmlUrl="http://leoville.tv/podcasts/ww.xml" htmlUrl="" />
+    <outline description="" text="DecodeDC" type="rss" xmlUrl="http://feeds.feedburner.com/DecodeDc" htmlUrl="" />
+    <outline description="" text="This American Life" type="rss" xmlUrl="http://feeds.thisamericanlife.org/talpodcast" htmlUrl="" />
+    <outline description="" text="LensWork - Photography and the Creative Process" type="rss" xmlUrl="http://lenswork.com/podcast.xml" htmlUrl="" />
+    <outline description="" text="Song Exploder" type="rss" xmlUrl="http://songexploder.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="How Sound" type="rss" xmlUrl="http://howsound.org/feed/podcast/" htmlUrl="" />
+    <outline description="" text="The New Disruptors" type="rss" xmlUrl="http://feeds.feedburner.com/newdisruptors" htmlUrl="" />
+    <outline description="" text="Bullseye with Jesse Thorn" type="rss" xmlUrl="http://feeds.feedburner.com/tsoya" htmlUrl="" />
+    <outline description="" text="Why Oh Why? with Andrea Silenzi" type="rss" xmlUrl="http://wfmu.org/podcast/LK.xml" htmlUrl="" />
+    <outline description="" text="Too Much Information" type="rss" xmlUrl="http://wfmu.org/podcast/TI.xml" htmlUrl="" />
+    <outline description="" text="Bitsplitting" xmlUrl="http://bitsplitting.org/?feed=podcast" htmlUrl="" />
+    <outline description="" text="This Developer's Life" xmlUrl="http://feeds.feedburner.com/ThisDevelopersLife" htmlUrl="" />
+    <outline description="" text="The Titanium Physicists Podcast" xmlUrl="http://titaniumphysics.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Why You're Wrong" xmlUrl="http://feeds.feedburner.com/WhyYoureWrong" htmlUrl="" />
+    <outline description="" text="The Ruby Show" type="rss" xmlUrl="http://feeds.feedburner.com/railsenvy-podcast" htmlUrl="" />
+    <outline description="" text="NextMarket" xmlUrl="http://feeds.feedburner.com/soundcloud/JEcj" htmlUrl="" />
+    <outline description="" text="The Moth Podcast" type="rss" xmlUrl="http://feeds.feedburner.com/themothpodcast" htmlUrl="" />
+    <outline description="" text="Wait Wait... Don't Tell Me!" type="rss" xmlUrl="http://www.npr.org/rss/podcast.php?id=35" htmlUrl="" />
+    <outline description="" text="this WEEK in TECH" type="rss" xmlUrl="http://leo.am/podcasts/twit" htmlUrl="" />
+    <outline description="" text="Rear vision" xmlUrl="http://www.abc.net.au/radionational/feed/2890034/podcast.xml" htmlUrl="" />
+    <outline description="" text="We're Alive" type="rss" xmlUrl="http://feeds.feedburner.com/itpc/wwwwaylandws/Wayland_Productions/Were_Alive_-_Podcast/rssxml" />
+    <outline description="" text="Answer me this" xmlUrl="http://answermethis.libsyn.com/rss/" htmlUrl="" />
+    <outline description="" text="The Nutrition Diva" type="rss" xmlUrl="http://www.quickanddirtytips.com/xml/nutrition.xml" htmlUrl="" />
+    <outline description="" text="The Skeptics Guide" xmlUrl="http://www.theskepticsguide.org/feed/rss.aspx?feed=sgu" htmlUrl="" />
+    <outline description="" text="Boardgame Babylon" type="rss" xmlUrl="http://boardgamebabylon.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Jordan, Jesse GO!" type="rss" xmlUrl="http://feeds.feedburner.com/thornmorris" htmlUrl="" />
+    <outline description="" text="Oh No Ross and Carrie" type="rss" xmlUrl="http://feeds.feedburner.com/OhNoPodcast" htmlUrl="" />
+    <outline description="" text="Off Camera with Sam Jones" xmlUrl="http://podcast.offcamera.com/feed/" htmlUrl="" />
+    <outline description="" text="Smartest man" xmlUrl="http://feeds.feedburner.com/TheSmartest" htmlUrl="" />
+    <outline description="" text="Tiny SparkTiny Spark" type="rss" xmlUrl="http://feeds.feedburner.com/tinyspark" htmlUrl="" />
+    <outline description="" text="On Taking Pictures" xmlUrl="http://feeds.feedburner.com/ontakingpictures" htmlUrl="" />
+    <outline description="" text="Stuff You Missed in History Class" type="rss" xmlUrl="http://www.howstuffworks.com/podcasts/stuff-you-missed-in-history-class.rss" htmlUrl="" />
+    <outline description="" text="Love + Radio" xmlUrl="http://feeds.feedburner.com/loveplusradio" htmlUrl="" />
+    <outline description="" text="Comedy Bang! Bang!" xmlUrl="http://feeds.feedburner.com/comedydeathrayradio" htmlUrl="" />
+    <outline description="" text="Real Talk Podcast" xmlUrl="http://feeds.feedburner.com/realtalkio" htmlUrl="" />
+    <outline description="" text="Wizards of the Coast Podcasts" type="rss" xmlUrl="https://www.wizards.com/rsspodcast.xml" />
+    <outline description="" text="The QA with Jeff Goldsmith" type="rss" xmlUrl="http://feeds.feedburner.com/TheQaWithJeffGoldsmith" htmlUrl="" />
+    <outline description="" text="Filmspotting: SVU" type="rss" xmlUrl="http://feeds.feedburner.com/filmspottingsvu" htmlUrl="" />
+    <outline description="" text="Home Theater Geeks" type="rss" xmlUrl="http://leoville.tv/podcasts/htg.xml" htmlUrl="" />
+    <outline description="" text="Doug Loves Movies" type="rss" xmlUrl="http://dlm.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="The Flop House" type="rss" xmlUrl="http://theflophouse.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="The Thunderbolts Project Podcast" xmlUrl="http://www.thunderbolts.info/wp/wp-content/podcasts/RSS/rss.xml" htmlUrl="" />
+    <outline description="" text="Body sphere" xmlUrl="http://www.abc.net.au/radionational/feed/3771040/podcast.xml" htmlUrl="" />
+    <outline description="" text="StarTalk Radio" xmlUrl="http://feeds.soundcloud.com/users/soundcloud:users:38128127/sounds.rss" htmlUrl="" />
+    <outline description="" text="Wiretap" type="rss" xmlUrl="http://www.cbc.ca/podcasting/includes/wiretap.xml" htmlUrl="" />
+    <outline description="" text="Professor Blastoff" xmlUrl="http://feeds.feedburner.com/professorblastoff" htmlUrl="" />
+    <outline description="" text="Science... sort of" xmlUrl="http://sciencesortof.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Star Wars Minute" xmlUrl="http://www.starwarsminute.com/podcast.xml" htmlUrl="" />
+    <outline description="" text="Encounters Podcast" xmlUrl="http://feeds2.feedburner.com/EncountersNorth" htmlUrl="" />
+    <outline description="" text="Superego" type="rss" xmlUrl="http://www.gosuperego.com/podcast.xml" htmlUrl="" />
+    <outline description="" text="WTF with Marc Maron Podcast" type="rss" xmlUrl="http://wtfpod.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="Mike and Tom Eat Snacks" type="rss" xmlUrl="http://feeds.feedburner.com/MikeAndTomEatSnacks" htmlUrl="" />
+    <outline description="" text="Welcome To Night Vale" xmlUrl="http://feeds.feedburner.com/WelcomeToNightVale" htmlUrl="" />
+    <outline description="" text="World in Words" xmlUrl="http://theworld.org/rss/twiw.xml" htmlUrl="" />
+    <outline description="" text="The Javascript Show" xmlUrl="http://feeds.feedburner.com/the-javascript-show" htmlUrl="" />
+    <outline description="" text="Leerburg Kennel Dog Training Podcast" type="rss" xmlUrl="http://leerburg.com/podcasts/leerburg.xml" htmlUrl="" />
+    <outline description="" text="this WEEK in MEDIA" type="rss" xmlUrl="http://feeds.pixelcorps.com/feeds/twim.xml" htmlUrl="" />
+    <outline description="" text="A Brief History of Mathematics" type="rss" xmlUrl="http://downloads.bbc.co.uk/podcasts/radio4/maths/rss.xml" />
+    <outline description="" text="Design Guy" type="rss" xmlUrl="http://feeds.feedburner.com/blogspot/designguyshow" htmlUrl="" />
+    <outline description="" text="Game On! with Cody and John" type="rss" xmlUrl="http://gameonpodcast.libsyn.com/rss" htmlUrl="" />
+    <outline description="" text="The Writer's Almanac" type="rss" xmlUrl="http://writersalmanac.publicradio.org/podcast/feed.php" htmlUrl="" />
+    <outline description="" text="Design Matters" type="rss" xmlUrl="http://designobserver.com/show.designmatters2009-10.xml" htmlUrl="" />
+    <outline description="" text="After the Jump" type="rss" xmlUrl="http://www.heritageradionetwork.com/programs/79-After-the-Jump.xml" htmlUrl="" />
+    <outline description="" text="The History of Rome" type="rss" xmlUrl="http://feeds.feedburner.com/TheHistoryOfRome" htmlUrl="" />
+    <outline description="" text="A History of the World in 100 Objects" type="rss" xmlUrl="http://downloads.bbc.co.uk/podcasts/radio4/ahow/rss.xml" htmlUrl="" />
+    <outline description="" text="Local Radio" type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=local" key="local"/>
+    <outline description="" text="Music"       type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=music" key="music"/>
+    <outline description="" text="Talk"        type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=talk" key="talk"/>
+    <outline description="" text="Sports"      type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=sports" key="sports"/>
+    <outline description="" text="By Location" type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?id=r0" key="location"/>
+    <outline description="" text="By Language" type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=lang" key="language"/>
+    <outline description="" text="Podcasts"    type="link" xmlUrl="http://opml.radiotime.com/Browse.ashx?c=podcast" key="podcast"/>
+   </body>
+</opml>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
