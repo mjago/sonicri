@@ -30,14 +30,6 @@ module PodPicr
               esc = 1
             when 10
               return {action: "selected", value: "eval"}
-            when 66, 98 # 'b'
-              return {action: "char", value: "b"}
-            when 70, 102 # 'f'
-              return {action: "char", value: "f"}
-            when 78, 110 # 'n'
-              return {action: "selection", value: "next_page"}
-            when 80, 112 # 'p'
-              return {action: "selection", value: "prev_page"}
             when 81, 113 # 'q'
               return {action: "back", value: "no value"}
             when 127 # 'DEL'
@@ -45,9 +37,6 @@ module PodPicr
             else
               return {action: "char", value: char.chr.to_s}
             end
-
-            #          if esc == 0
-            #            @file.puts "esc 0 : char #{char}"
           elsif esc == 2
             STDIN.flush
             esc = 0

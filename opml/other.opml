@@ -4,6 +4,7 @@
         <title>Favourites</title>
     </head>
     <body>
+      <outline description="Simple Cast" text="Simple Cast" xmlUrl="https://rss.simplecast.com/podcasts/282/rss" type="rss" />
       <outline description="IOT Podcast" text="IOT Podcast" xmlUrl="http://iotpodcast.com/feed/podcast" type="rss" />
       <outline description="The Verve" text="The Verve" xmlUrl="https://www.theverge.com/rss/index.xml" type="rss" />
       <outline description="Techcrunch" text="Techcrunch" xmlUrl="https://techcrunch.com/feed" type="rss" />

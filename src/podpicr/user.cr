@@ -187,10 +187,12 @@ module PodPicr
           return :back
         when "char"
           case res[:value]
-          when "f"
-            @audio.jump_forward
-          when "b"
-            @audio.jump_back
+          when "f", "F"
+            @audio.jump_forward if @audio.running?
+          when "b", "B"
+            @audio.jump_back if @audio.running?
+          when "p", "P"
+            @audio.pause if @audio.running?
           end
         end
       end

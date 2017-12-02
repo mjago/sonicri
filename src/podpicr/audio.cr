@@ -58,6 +58,7 @@ module PodPicr
       fiber_decode_chunks
       fiber_play_chunks
       @running = true
+      @pause = false
     end
 
     def jump_back
@@ -66,6 +67,10 @@ module PodPicr
     def jump_forward
       offset = @mpg.sample_offset
       @mpg.seek_sample(offset + 441_000, :seek_set)
+    end
+
+    def pause
+      @pause = @pause ? false : true
     end
 
     private def io_write(slice : Bytes)
@@ -195,6 +200,9 @@ module PodPicr
     private def fiber_decode_chunks
       spawn do
         loop do
+          while @pause
+            sleep 0.1
+          end
           break if @quit
           outsize = BUF_SIZE
           data = nil
