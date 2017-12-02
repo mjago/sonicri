@@ -31,9 +31,9 @@ module PodPicr
             when 10
               return {action: "selected", value: "eval"}
             when 66, 98 # 'b'
-              return {action: "selection", value: "prev"}
+              return {action: "char", value: "b"}
             when 70, 102 # 'f'
-              return {action: "selection", value: "next"}
+              return {action: "char", value: "f"}
             when 78, 110 # 'n'
               return {action: "selection", value: "next_page"}
             when 80, 112 # 'p'

@@ -109,6 +109,8 @@ module PodPicr
           return {action: "select", value: @display.selected.to_s}
         when "back"
           return {action: "back", value: ""}
+        when "char"
+          return {action: "char", value: response[:value]}
         end
       end
     end

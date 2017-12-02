@@ -185,6 +185,13 @@ module PodPicr
           return :selected
         when "back"
           return :back
+        when "char"
+          case res[:value]
+          when "f"
+            @audio.jump_forward
+          when "b"
+            @audio.jump_back
+          end
         end
       end
       :no_action

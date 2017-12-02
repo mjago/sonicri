@@ -19,9 +19,9 @@ module PodPicr
     def initialize
       @io_readpos = @done = @rate =
       @total_size = 0_i64
+      @channels = @bits = 0
       @running = @quit = false
-      @bits = 0
-      @mpg = Mp.new
+      @mpg = Mpg123.new
       @mpg.new(nil)
       @ao = Ao.new
       @ch_play = Channel(Nil).new
@@ -58,7 +58,15 @@ module PodPicr
       fiber_decode_chunks
       fiber_play_chunks
       @running = true
-      end
+    end
+
+    def jump_back
+    end
+
+    def jump_forward
+      offset = @mpg.sample_offset
+      @mpg.seek_sample(offset + 441_000, :seek_set)
+    end
 
     private def io_write(slice : Bytes)
       @io.pos = @io.size
@@ -78,11 +86,11 @@ module PodPicr
 
     private def set_audio_format
       @rate = @done = 0_i64
-      channels = encoding = 0
-      @mpg.get_format(pointerof(@rate), pointerof(channels), pointerof(encoding))
+      @channels = encoding = 0
+      @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
       @bits = @mpg.encsize(encoding) * 8
       byte_format = LibAO::Byte_Format::AO_FMT_BIG
-      @ao.set_format(@bits, @rate, channels, byte_format, matrix = nil)
+      @ao.set_format(@bits, @rate, @channels, byte_format, matrix = nil)
       @ao.open_live
     end
 
@@ -134,11 +142,20 @@ module PodPicr
 
     private def display_progress
       if win = @win
-        if @total_size > 0_i64
-          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-          win.print(info_line)
+        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
+        if (rate = @rate) > 0
+          offset = @mpg.sample_offset
+          sec = offset / @rate
+          win.print("time: #{sec/60}:#{"%02d" % (sec%60)}, rate: #{@rate}")
+#          win.print("offset: #{offset}")
           win.refresh
         end
+
+#        if @total_size > 0_i64
+#          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
+#          win.print(info_line)
+#          win.refresh
+#        end
       else
         raise "Error: no Window!"
       end
@@ -154,12 +171,12 @@ module PodPicr
 
     private def process_result(result)
       case result
-      when LibMP::MP_Errors::MP_NEW_FORMAT.value
+      when LibMPG::Errors::NEW_FORMAT.value
         set_audio_format
-      when LibMP::MP_Errors::MP_OK.value
+      when LibMPG::Errors::OK.value
         @ch_play.send(nil)
-      when LibMP::MP_Errors::MP_NEED_MORE.value
-      when LibMP::MP_Errors::MP_BAD_HANDLE.value
+      when LibMPG::Errors::NEED_MORE.value
+      when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       else
         raise("Error: Unexpected error in PlayAudio")
