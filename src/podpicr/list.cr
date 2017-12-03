@@ -82,7 +82,7 @@ module PodPicr
     end
 
     def update(addr)
-      Downloader.new.fetch(addr, TEMP_LIST)
+      Downloader.fetch(addr, TEMP_LIST)
       @document = XML.parse(TEMP_LIST)
       # check_for_errors
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")

@@ -10,39 +10,45 @@ module PodPicr
     include Libao
     include Libmpg123
 
-    BUF_SIZE         = 4096
-    BUF_COUNT        =    2
+    BUF_SIZE         = 4800
     INFO_LINE_LENGTH =   55
     INFO_POS_ROW     =   23
     INFO_POS_COL     =    0
 
     def initialize
+      @source = :feed
       @io_readpos = @done = @rate =
-      @total_size = 0_i64
+      @total_size = @file_end = 0_i64
       @channels = @bits = 0
       @running = @quit = false
-      @mpg = Mpg123.new
-      @mpg.new(nil)
       @ao = Ao.new
-      @ch_play = Channel(Nil).new
       @dl = Downloader.new
       @dl.chunk_size = BUF_SIZE
+      @ch_play = Channel(Nil).new
       @io = IO::Memory.new
       @inslice = Bytes.new(BUF_SIZE)
       @auxslice = Bytes.new(BUF_SIZE)
       @ao_buf = Bytes.new(BUF_SIZE)
+      @read_count = 1
+      @seek_value = 0_i64
+      @mpg = Mpg123.new
+      @mpg.new(nil)
     end
 
     def stop
       quit
-      sleep 0.3
+      @dl.quit
+      sleep 0.2
       initialize
+      @running = false
     end
 
     def quit
-      @io.flush
+      #      stop
+      @mpg.exit
       @dl.quit
       @quit = true
+      @io.flush
     end
 
     def running?
@@ -57,16 +63,66 @@ module PodPicr
       fiber_update_display
       fiber_decode_chunks
       fiber_play_chunks
+      fiber_monitor_download
       @running = true
       @pause = false
     end
 
-    def jump_back
+    def current_sample_offset
+      @mpg.sample_offset
     end
 
-    def jump_forward
-      offset = @mpg.sample_offset
-      @mpg.seek_sample(offset + 441_000, :seek_set)
+    def update_end_position
+      current_pos = current_sample_offset
+      @file_end = @mpg.seek(0_i64, :seek_end)
+      @mpg.seek(current_pos)
+    end
+
+    def move_to_file_cache
+      current_position = current_sample_offset
+      @mpg.open("local.mp3")
+      update_end_position
+      jump_to(current_position)
+      @source = :file
+    end
+
+    def calc_offset(distance)
+      multiplier =
+        case distance
+        when :large
+          60_i64
+        else
+          10_i64
+        end
+      44_000_i64 * multiplier
+    end
+
+    def jump_back(distance = :small)
+      if @source == :file
+        offset = calc_offset(distance)
+        sample_offset = @mpg.sample_offset
+        unless sample_offset - offset < 0
+          jump_relative -offset
+        end
+      end
+    end
+
+    def jump_forward(distance = :small)
+      if @source == :file
+        offset = calc_offset(distance)
+        new_offset = current_sample_offset + offset
+        if new_offset < @file_end
+          jump_to new_offset
+        end
+      end
+    end
+
+    def jump_relative(offset)
+      @mpg.seek(offset, :seek_cur)
+    end
+
+    def jump_to(offset)
+      @mpg.seek(offset, :seek_set)
     end
 
     def pause
@@ -110,6 +166,16 @@ module PodPicr
       spawn do
         @dl.get_chunks(redir) do |chunk|
           io_write chunk
+          break if @quit
+        end
+      end
+    end
+
+    private def fiber_get_chunks
+      spawn do
+        @dl.get_chunks do |chunk|
+          io_write chunk
+          break if @quit
         end
       end
     end
@@ -135,12 +201,22 @@ module PodPicr
     end
 
     private def fiber_update_display
-      # display_buffering
       spawn do
-        loop do
-          break if @quit
+        while !@quit
           display_progress
           sleep 0.5
+        end
+      end
+    end
+
+    private def fiber_monitor_download
+      spawn do
+        while !@quit
+          if @dl && @dl.download_done
+            move_to_file_cache if @source == :feed
+            break
+          end
+          sleep 0.1
         end
       end
     end
@@ -151,16 +227,21 @@ module PodPicr
         if (rate = @rate) > 0
           offset = @mpg.sample_offset
           sec = offset / @rate
-          win.print("time: #{sec/60}:#{"%02d" % (sec%60)}, rate: #{@rate}")
-#          win.print("offset: #{offset}")
+          if @source == :file
+            finish = @file_end / @rate
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{finish/60}:#{"%02d" % (finish % 60)}")
+          else
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
+          end
+          #          win.print("offset: #{offset}")
           win.refresh
         end
 
-#        if @total_size > 0_i64
-#          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-#          win.print(info_line)
-#          win.refresh
-#        end
+        #        if @total_size > 0_i64
+        #          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
+        #          win.print(info_line)
+        #          win.refresh
+        #        end
       else
         raise "Error: no Window!"
       end
@@ -176,15 +257,16 @@ module PodPicr
 
     private def process_result(result)
       case result
+      when LibMPG::Errors::DONE.value
+#        quit
       when LibMPG::Errors::NEW_FORMAT.value
         set_audio_format
       when LibMPG::Errors::OK.value
         @ch_play.send(nil)
       when LibMPG::Errors::NEED_MORE.value
+#        quit if @source == :file
       when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
-      else
-        raise("Error: Unexpected error in PlayAudio")
       end
       sleep 0
     end
@@ -199,9 +281,10 @@ module PodPicr
 
     private def fiber_decode_chunks
       spawn do
-        loop do
+        while !@quit
           while @pause
             sleep 0.1
+            break if @quit
           end
           break if @quit
           outsize = BUF_SIZE
@@ -224,8 +307,7 @@ module PodPicr
     private def fiber_play_chunks
       spawn do
         ptr = 0
-        loop do
-          break if @quit
+        while !@quit
           @ch_play.receive
           @ao.play(@ao_buf, @done)
           sleep 0

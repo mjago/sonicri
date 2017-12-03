@@ -25,7 +25,7 @@ module PodPicr
     end
 
     private def fetch(url)
-      Downloader.new.fetch(url, TEMP_RSS)
+      Downloader.fetch(url, TEMP_RSS)
       FileUtils.cp(TEMP_RSS, RSS_FILE)
       true
     end

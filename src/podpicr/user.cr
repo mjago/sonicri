@@ -40,7 +40,7 @@ module PodPicr
     # private
 
     private def process_user_state
-      if stproc = @states[@state.state]?
+      if(stproc = @states[@state.state]?)
         call_state stproc
       else
         raise "state proc is nil in User#process_state"
@@ -128,8 +128,10 @@ module PodPicr
 
     private def episode_select_state
       case episode_select
-      when :selected; A::EpisodeSelected
-      when :back    ; A::Back
+      when :selected
+        A::EpisodeSelected
+      when :back
+        A::Back
       else
         A::NoAction
       end
@@ -186,13 +188,21 @@ module PodPicr
         when "back"
           return :back
         when "char"
-          case res[:value]
-          when "f", "F"
-            @audio.jump_forward if @audio.running?
-          when "b", "B"
-            @audio.jump_back if @audio.running?
-          when "p", "P"
-            @audio.pause if @audio.running?
+          if @audio.running?
+            case res[:value]
+            when "f"
+              @audio.jump_forward(:small)
+            when "F"
+              @audio.jump_forward(:large)
+            when "b"
+              @audio.jump_back(:small)
+            when "B"
+              @audio.jump_back(:large)
+            when "p", "P"
+              @audio.pause
+            when "s", "S"
+              @audio.stop
+            end
           end
         end
       end
