@@ -40,7 +40,7 @@ module PodPicr
     # private
 
     private def process_user_state
-      if(stproc = @states[@state.state]?)
+      if (stproc = @states[@state.state]?)
         call_state stproc
       else
         raise "state proc is nil in User#process_state"

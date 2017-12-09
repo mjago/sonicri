@@ -18,7 +18,7 @@ module PodPicr
     def initialize
       @source = :feed
       @io_readpos = @done = @rate =
-      @total_size = @file_end = 0_i64
+        @total_size = @file_end = 0_i64
       @channels = @bits = 0
       @running = @quit = false
       @ao = Ao.new
@@ -258,13 +258,13 @@ module PodPicr
     private def process_result(result)
       case result
       when LibMPG::Errors::DONE.value
-#        quit
+        #        quit
       when LibMPG::Errors::NEW_FORMAT.value
         set_audio_format
       when LibMPG::Errors::OK.value
         @ch_play.send(nil)
       when LibMPG::Errors::NEED_MORE.value
-#        quit if @source == :file
+        #        quit if @source == :file
       when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       end

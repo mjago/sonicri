@@ -1,4 +1,5 @@
 require "http/client"
+
 module PodPicr
   class Downloader
     setter chunk_size
@@ -47,32 +48,32 @@ module PodPicr
           count = 0
           total_count = 0
           count = @file.read(chunk)
-       #   puts "count #{count}"
+          #   puts "count #{count}"
           quit if count == 0
           sized = chunk[0, count]
           channel.send(sized)
         end
       end
 
-        #HTTP::Client.get(redir) do |response|
-        #  length = 0 unless length = response.headers["Content-Length"].to_i
-        #  while !@quit
-        #    count = response.body_io.read(chunk)
-        #    quit if count == 0
-        #    break if @quit
-        #    total_count += count
-        #    unless length == 0
-        #      quit if total_count >= length
-        #      break if @quit
-        #    end
-        #    sized = chunk[0, count]
-#       #     @file.write(sized)
-        #    channel.send(sized)
-        #  end
-        #  break if @quit
-        #end
-        #STDERR.print "."
-      #end
+      # HTTP::Client.get(redir) do |response|
+      #  length = 0 unless length = response.headers["Content-Length"].to_i
+      #  while !@quit
+      #    count = response.body_io.read(chunk)
+      #    quit if count == 0
+      #    break if @quit
+      #    total_count += count
+      #    unless length == 0
+      #      quit if total_count >= length
+      #      break if @quit
+      #    end
+      #    sized = chunk[0, count]
+      #       #     @file.write(sized)
+      #    channel.send(sized)
+      #  end
+      #  break if @quit
+      # end
+      # STDERR.print "."
+      # end
       STDERR.puts "quitting" if @quit
       return if @quit
       while chunk = channel.receive
