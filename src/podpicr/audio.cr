@@ -251,7 +251,7 @@ module PodPicr
           sec = offset / @rate
           if @source == :file && @rate > 0
             @file_size = @sample_length / @rate
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}")
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}          ")
           else
             win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
           end
