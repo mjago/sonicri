@@ -33,6 +33,9 @@ module PodPicr
       @seek_value = 0_i64
       @mpg = Mpg123.new
       @mpg.new(nil)
+      @cache_name = ""
+      @file_size = 0_i64
+      @sample_length = 0_i64
     end
 
     def stop
@@ -55,35 +58,47 @@ module PodPicr
       @running
     end
 
-    def run(addr)
-      io = IO::Memory.new
-      redir = @dl.follow_redirects(addr)
-      @mpg.open_feed
-      fiber_get_chunks(redir)
-      fiber_update_display
-      fiber_decode_chunks
-      fiber_play_chunks
-      fiber_monitor_download
-      @running = true
-      @pause = false
+    def move_to_file_cache (start = false)
+      current_pos = start ? 0_i64 : current_sample_offset
+      @mpg.open(@cache_name)
+      @mpg.param(:flags, :quiet, 0.0)
+      @sample_length = @mpg.length
+      @mpg.seek(current_pos)
+      @source = :file
+    end
+
+    def make_cache_name(cache_name)
+      "cache/#{cache_name}.mp3"
+    end
+
+    def run(name, addr)
+      @cache_name = make_cache_name(name)
+      if File.exists? @cache_name
+        io = IO::Memory.new
+        move_to_file_cache(start = true)
+#        fiber_get_chunks(redir)
+        fiber_update_display
+        fiber_decode_chunks
+        fiber_play_chunks
+        fiber_monitor_download
+        @running = true
+        @pause = false
+      else
+        io = IO::Memory.new
+        redir = @dl.follow_redirects(addr)
+        @mpg.open_feed
+        fiber_get_chunks(redir)
+        fiber_update_display
+        fiber_decode_chunks
+        fiber_play_chunks
+        fiber_monitor_download
+        @running = true
+        @pause = false
+      end
     end
 
     def current_sample_offset
       @mpg.sample_offset
-    end
-
-    def update_end_position
-      current_pos = current_sample_offset
-      @file_end = @mpg.seek(0_i64, :seek_end)
-      @mpg.seek(current_pos)
-    end
-
-    def move_to_file_cache
-      current_position = current_sample_offset
-      @mpg.open("local.mp3")
-      update_end_position
-      jump_to(current_position)
-      @source = :file
     end
 
     def calc_offset(distance)
@@ -111,7 +126,7 @@ module PodPicr
       if @source == :file
         offset = calc_offset(distance)
         new_offset = current_sample_offset + offset
-        if new_offset < @file_end
+        if new_offset < @sample_length
           jump_to new_offset
         end
       end
@@ -149,7 +164,10 @@ module PodPicr
       @rate = @done = 0_i64
       @channels = encoding = 0
       @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
+#      puts "\n\n\r@rate #{@rate}"
       @bits = @mpg.encsize(encoding) * 8
+#      puts "\n\n\r@bits #{@bits}"
+      #      exit
       byte_format = LibAO::Byte_Format::AO_FMT_BIG
       @ao.set_format(@bits, @rate, @channels, byte_format, matrix = nil)
       @ao.open_live
@@ -204,7 +222,7 @@ module PodPicr
       spawn do
         while !@quit
           display_progress
-          sleep 0.5
+          sleep 1.0
         end
       end
     end
@@ -213,10 +231,14 @@ module PodPicr
       spawn do
         while !@quit
           if @dl && @dl.download_done
-            move_to_file_cache if @source == :feed
-            break
+            if @source == :feed
+              FileUtils.mkdir_p File.dirname(@cache_name)
+              FileUtils.cp "local.mp3", @cache_name
+              move_to_file_cache
+              break
+            end
           end
-          sleep 0.1
+          sleep 0.5
         end
       end
     end
@@ -227,9 +249,9 @@ module PodPicr
         if (rate = @rate) > 0
           offset = @mpg.sample_offset
           sec = offset / @rate
-          if @source == :file
-            finish = @file_end / @rate
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{finish/60}:#{"%02d" % (finish % 60)}")
+          if @source == :file && @rate > 0
+            @file_size = @sample_length / @rate
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}")
           else
             win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
           end
@@ -258,7 +280,7 @@ module PodPicr
     private def process_result(result)
       case result
       when LibMPG::Errors::DONE.value
-        #        quit
+        quit
       when LibMPG::Errors::NEW_FORMAT.value
         set_audio_format
       when LibMPG::Errors::OK.value

@@ -13,6 +13,7 @@ module PodPicr
       @keys = Keys.new(@display.window)
       @station = ""
       @title = ""
+      @program = ""
       @display_stack = Deque(Display).new
       @rss = RSS.new
     end
@@ -103,9 +104,13 @@ module PodPicr
         case response[:action]
         when "selection"
           @display.redraw(response)
+#          puts "\n\n\r#{@display.list.inspect}"
         when "selected"
           @display.redraw(response)
-          program = @display.list[@display.selected]
+
+          @program = @display.list[@display.selected]
+#          puts "\n\n\r#{file_friendly_name}"
+
           return {action: "select", value: @display.selected.to_s}
         when "back"
           return {action: "back", value: ""}
@@ -113,6 +118,21 @@ module PodPicr
           return {action: "char", value: response[:value]}
         end
       end
+    end
+
+    def file_friendly_name
+      [@station, @title, @program].map { |n| sanitize_name n }.join("/")
+    end
+
+    private def sanitize_name(name)
+      array = [] of Char
+      name.each_char do |char|
+        array << case char
+                 when 'a'..'z', 'A'..'Z', '0'..'9'; char
+                 else '_'
+                 end
+      end
+      array.join
     end
 
     private def valid_response?(response)

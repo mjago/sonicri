@@ -74,7 +74,7 @@ module PodPicr
     def outdated? # todo
       time = PodPicr::Time.new
       false
-      true
+      #true
     end
 
     def update

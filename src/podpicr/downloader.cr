@@ -46,7 +46,6 @@ module PodPicr
       spawn do
         while !@quit
           count = 0
-          total_count = 0
           count = @file.read(chunk)
           #   puts "count #{count}"
           quit if count == 0
@@ -61,9 +60,7 @@ module PodPicr
       #    count = response.body_io.read(chunk)
       #    quit if count == 0
       #    break if @quit
-      #    total_count += count
       #    unless length == 0
-      #      quit if total_count >= length
       #      break if @quit
       #    end
       #    sized = chunk[0, count]
@@ -86,16 +83,17 @@ module PodPicr
       chunk = Bytes.new(@chunk_size)
       spawn do
         count = 0
-        total_count = 0
         HTTP::Client.get(redir) do |response|
           length = 0 unless length = response.headers["Content-Length"].to_i
           while !@quit
             count = response.body_io.read(chunk)
-            quit if count == 0
+            if count == 0
+              @file.close
+              quit
+              break
+            end
             break if @quit
-            total_count += count
             unless length == 0
-              quit if total_count >= length
               break if @quit
             end
             sized = chunk[0, count]
@@ -104,7 +102,6 @@ module PodPicr
           end
           break if @quit
         end
-        @file.close
         @download_done = true
       end
       STDERR.puts "quitting" if @quit
