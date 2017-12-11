@@ -11,6 +11,7 @@ module PodPicr
       @list = List.new
       @display = Display.new(@page)
       @keys = Keys.new(@display.window)
+      @categories = ["Podcasts", "Music", "Radio Stations"]
       @station = ""
       @title = ""
       @program = ""
@@ -25,6 +26,10 @@ module PodPicr
 
     def init_list(kind)
       case (kind[:type])
+      when "categories"
+        @page.name = "Categories"
+        @display.page = @page
+        @display.list = @categories
       when "stations"
         @page.name = "Stations"
         @display.page = @page
@@ -63,6 +68,25 @@ module PodPicr
       {url: url, length: length}
     end
 
+    def category_monitor
+      response = @keys.check_input
+      if valid_response? response
+        case response[:action]
+        when "selection"
+          @display.redraw(response)
+        when "selected"
+          @display_stack.push @display.dup
+          @display.redraw(response)
+          category = @categories[@display.selected]
+          return {action: "select", value: category}
+        when "back"
+          return {action: "back", value: ""}
+        when "char"
+          return {action: "char", value: response[:value]}
+        end
+      end
+    end
+
     def stations_monitor
       response = @keys.check_input
       if valid_response? response
@@ -73,9 +97,11 @@ module PodPicr
           @display_stack.push @display.dup
           @display.redraw(response)
           @station = @list.stations[@display.selected]
-          return {action: "select", station: @station}
+          return {action: "select", value: @station}
         when "back"
-          return {action: "back", station: ""}
+          return {action: "back", value: ""}
+        when "char"
+          return {action: "char", value: response[:value]}
         end
       end
     end
@@ -91,9 +117,11 @@ module PodPicr
           @display.redraw(response)
           @title = @display.list[@display.selected]
           xml_link = @list.xmlUrl(@title)[0]
-          return {action: "select", xmlUrl: xml_link}
+          return {action: "select", value: xml_link}
         when "back"
-          return {action: "back", xmlUrl: ""}
+          return {action: "back", value: ""}
+        when "char"
+          return {action: "char", value: response[:value]}
         end
       end
     end

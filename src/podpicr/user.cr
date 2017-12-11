@@ -4,19 +4,24 @@ module PodPicr
 
     def initialize
       @states =
-        {S::Init          => ->init_state,
-         S::ListAge       => ->list_age_state,
-         S::ListParse     => ->list_parse_state,
-         S::StationInit   => ->station_init_state,
-         S::StationResume => ->station_resume_state,
-         S::StationSelect => ->station_select_state,
-         S::ShowInit      => ->show_init_state,
-         S::ShowResume    => ->show_resume_state,
-         S::ShowSelect    => ->show_select_state,
-         S::EpisodeInit   => ->episode_init_state,
-         S::EpisodeSelect => ->episode_select_state,
-         S::EpisodePlay   => ->episode_play_state,
-         S::Exit          => ->exit_state}
+        {
+          S::Init          => ->init_state,
+          S::Categories    => ->categories_state,
+          S::Podcast       => ->podcast_state,
+          S::Music         => ->music_state,
+          S::Radio         => ->radio_state,
+          S::ListParse     => ->list_parse_state,
+          S::StationInit   => ->station_init_state,
+          S::StationResume => ->station_resume_state,
+          S::StationSelect => ->station_select_state,
+          S::ShowInit      => ->show_init_state,
+          S::ShowResume    => ->show_resume_state,
+          S::ShowSelect    => ->show_select_state,
+          S::EpisodeInit   => ->episode_init_state,
+          S::EpisodeSelect => ->episode_select_state,
+          S::EpisodePlay   => ->episode_play_state,
+          S::Exit          => ->exit_state
+        }
 
       @state = State.new UserStates
       @list = List.new
@@ -66,21 +71,44 @@ module PodPicr
     # states
 
     private def init_state
+      @ui.list = @list
+      @list.update if @list.outdated?
+      @ui.init_list({type: "categories", value: ""})
       A::Init
     end
 
-    private def list_age_state
+    private def categories_state
+      case category_select
+      when :podcast_selected; A::PodcastSelected
+      when :music_selected; A::MusicSelected
+      when :radio_selected; A::RadioSelected
+      when :exit    ; A::Exit
+      else
+        A::NoAction
+      end
+    end
+
+    private def podcast_state
+      A::Init
+    end
+
+    private def music_state
       @list.update if @list.outdated?
-      A::ListAged
+      A::Init
+    end
+
+    private def radio_state
+      @list.update if @list.outdated?
+      A::Init
     end
 
     private def list_parse_state
-      @list.parse
+      @list.parse unless @list.parsed
       A::ListParsed
     end
 
     private def station_init_state
-      @ui.list = @list
+#      @ui.list = @list
       @ui.init_list({type: "stations", value: ""})
       A::StationInit
     end
@@ -93,7 +121,7 @@ module PodPicr
     private def station_select_state
       case station_select
       when :selected; A::StationSelected
-      when :back    ; A::Exit
+      when :back    ; A::Back
       else
         A::NoAction
       end
@@ -152,61 +180,89 @@ module PodPicr
     end
 
     private def station_select
-      res = @ui.stations_monitor
-      if (res.is_a?({action: String, station: String}))
+      if res = @ui.stations_monitor
         case res[:action]
         when "select"
-          @show = res[:station]
+          @show = res[:value]
           return :selected
         when "back"
           return :back
+        when "char"
+          monitor_playing res[:value]
+        end
+      end
+      :no_action
+    end
+
+    private def category_select
+      if res = @ui.category_monitor
+        case res[:action]
+        when "select"
+          case res[:value]
+          when "Podcasts"
+            return :podcast_selected
+          when "Music"
+            return :music_selected
+          when "Radio Stations"
+            return :radio_selected
+          else
+            raise "Error: Invalid category! (#{res[:value].inspect})"
+          end
+        when "back"
+          return :exit
+        when "char"
+          monitor_playing res[:value]
         end
       end
       :no_action
     end
 
     private def show_select
-      res = @ui.shows_monitor
-      if (res.is_a?({action: String, xmlUrl: String}))
+      if res = @ui.shows_monitor
         case res[:action]
         when "select"
-          @xml_url = res[:xmlUrl]
+          @xml_url = res[:value]
           return :selected
         when "back"
           return :back
+        when "char"
+          monitor_playing res[:value]
         end
       end
       :no_action
     end
 
     private def episode_select
-      res = @ui.episodes_monitor
-      if (res.is_a?({action: String, value: String}))
+      if res = @ui.episodes_monitor
         case res[:action]
         when "select"
           return :selected
         when "back"
           return :back
         when "char"
-          if @audio.running?
-            case res[:value]
-            when "f"
-              @audio.jump_forward(:small)
-            when "F"
-              @audio.jump_forward(:large)
-            when "b"
-              @audio.jump_back(:small)
-            when "B"
-              @audio.jump_back(:large)
-            when "p", "P"
-              @audio.pause
-            when "s", "S"
-              @audio.stop
-            end
-          end
+          monitor_playing res[:value]
         end
       end
       :no_action
+    end
+
+    private def monitor_playing(value)
+      if @audio.running?
+        case value
+        when "f"
+          @audio.jump_forward(:small)
+        when "F"
+          @audio.jump_forward(:large)
+        when "b"
+          @audio.jump_back(:small)
+        when "B"
+          @audio.jump_back(:large)
+        when "p", "P"
+          @audio.pause
+        when "s", "S"
+          @audio.stop
+        end
+      end
     end
 
     private def episode_play

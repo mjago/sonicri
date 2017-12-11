@@ -10,12 +10,15 @@ module PodPicr
     TwitOpmlAddr = "http://feeds.twit.tv/twitshows.opml"
     OPML_File    = "temp.xml"
 
+    getter parsed
+
     def initialize
       @data = [] of ListStruct
       @selected_idx = 0
       @results = {} of String => Array(String)
       @station = ""
       @twit = false
+      @parsed = false
     end
 
     def parse
@@ -34,6 +37,7 @@ module PodPicr
       parse_OPML_local("opml/other.opml")
       do_parse
       sort_stations
+      @parsed = true
     end
 
     def stations

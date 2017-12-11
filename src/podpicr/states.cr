@@ -1,7 +1,10 @@
 module PodPicr
   enum UserState
     Init
-    ListAge
+    Categories
+    Podcast
+    Music
+    Radio
     ListParse
     StationInit
     StationResume
@@ -18,7 +21,9 @@ module PodPicr
   enum UserAction
     NoAction
     Init
-    ListAged
+    PodcastSelected
+    MusicSelected
+    RadioSelected
     ListParsed
     StationInit
     StationResumed
@@ -37,13 +42,19 @@ module PodPicr
   alias A = UserAction
 
   UserStates = [
-    {st: S::Init, res: A::Init, to: S::ListAge},
-    {st: S::ListAge, res: A::ListAged, to: S::ListParse},
+    {st: S::Init, res: A::Init, to: S::Categories},
+    {st: S::Categories, res: A::PodcastSelected, to: S::Podcast},
+    {st: S::Categories, res: A::MusicSelected, to: S::Music},
+    {st: S::Categories, res: A::RadioSelected, to: S::Radio},
+    {st: S::Categories, res: A::Exit, to: S::Exit},
+    {st: S::Podcast, res: A::Init, to: S::ListParse},
+    {st: S::Music, res: A::Init, to: S::ListParse},
+    {st: S::Radio, res: A::Init, to: S::ListParse},
     {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
     {st: S::StationInit, res: A::StationInit, to: S::StationSelect},
     {st: S::StationResume, res: A::StationResumed, to: S::StationSelect},
     {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
-    {st: S::StationSelect, res: A::Exit, to: S::Exit},
+    {st: S::StationSelect, res: A::Back, to: S::Init},
     {st: S::ShowInit, res: A::ShowInit, to: S::ShowSelect},
     {st: S::ShowResume, res: A::ShowResumed, to: S::ShowSelect},
     {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
