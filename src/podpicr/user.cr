@@ -223,23 +223,11 @@ module PodPicr
         when "select"
           @audio.stop if @audio.running?
           await_audio_stop
-          @audio.play_music res[:value].to_s
-
-          #          when ""
-          #            return :podcast_selected
-          #          #when "Music"
-          #          #  return :music_selected
-          #          #when "Radio Stations"
-          #          #  return :radio_selected
-          #          else
-          #            raise "Error: Invalid category! (#{res[:value].inspect})"
-          #          end
+          @audio.play_music res[:value]
         when "back"
           return :back unless res[:value] == "internal"
-          #        when "char"
-          #          monitor_playing res[:value]
-          #        end
-          #        end
+        when "char"
+          monitor_playing res[:value]
         end
       end
       :no_action

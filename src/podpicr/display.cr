@@ -140,11 +140,16 @@ module PodPicr
         end
     end
 
+    def line_size(str)
+      # don't count combining accents
+      str.delete("\u0300\u0301\u0302\u0308").size
+    end
+
     private def line_length_correction(line_num)
       temp = ""
       line = @list[line_num]
       if (line.size > @page.line_size)
-        temp = (line[0..(@page.line_size - 4)] + "...")
+        temp = (line[0..(@page.line_size - 5)] + "...")
       else
         temp = line
       end
@@ -152,8 +157,9 @@ module PodPicr
     end
 
     private def line_format(str)
-      if @page.line_size > str.size
-        str = str + (" " * (@page.line_size - str.size))
+      size = line_size(str)
+      if @page.line_size > size
+        str = str + (" " * (@page.line_size - size))
       end
       " " + str.gsub('_', ' ')
     end
