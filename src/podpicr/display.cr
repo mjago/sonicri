@@ -92,6 +92,10 @@ module PodPicr
       @page.selected
     end
 
+    def selection
+      @page.selection
+    end
+
     # private...
 
     private def draw_item_num(line_num)
@@ -151,7 +155,7 @@ module PodPicr
       if @page.line_size > str.size
         str = str + (" " * (@page.line_size - str.size))
       end
-      " " + str
+      " " + str.gsub('_', ' ')
     end
 
     private def draw_color_line(line_num, color)

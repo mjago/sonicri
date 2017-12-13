@@ -7,10 +7,9 @@ module PodPicr
         {
           S::Init          => ->init_state,
           S::Categories    => ->categories_state,
-          S::Podcast       => ->podcast_state,
-          S::Music         => ->music_state,
-          S::Radio         => ->radio_state,
-          S::ListParse     => ->list_parse_state,
+          S::MusicInit     => ->music_init_state,
+          S::MusicSelect   => ->music_select_state,
+          S::RadioInit     => ->radio_init_state,
           S::StationInit   => ->station_init_state,
           S::StationResume => ->station_resume_state,
           S::StationSelect => ->station_select_state,
@@ -20,7 +19,7 @@ module PodPicr
           S::EpisodeInit   => ->episode_init_state,
           S::EpisodeSelect => ->episode_select_state,
           S::EpisodePlay   => ->episode_play_state,
-          S::Exit          => ->exit_state
+          S::Exit          => ->exit_state,
         }
 
       @state = State.new UserStates
@@ -48,14 +47,14 @@ module PodPicr
       if (stproc = @states[@state.state]?)
         call_state stproc
       else
-        raise "state proc is nil in User#process_state"
+        raise "state proc is nil in User#process_user_state"
       end
     end
 
     private def call_state(state_proc)
       ret = state_proc.call
       unless ret.is_a? A
-        raise "Error: Invalid action (#{ret}) in User#process_state!"
+        raise "Error: Invalid action (#{ret}) in User#call_state!"
       end
       action ret
     end
@@ -80,37 +79,38 @@ module PodPicr
     private def categories_state
       case category_select
       when :podcast_selected; A::PodcastSelected
-      when :music_selected; A::MusicSelected
-      when :radio_selected; A::RadioSelected
-      when :exit    ; A::Exit
+      when :music_selected  ; A::MusicSelected
+      when :radio_selected  ; A::RadioSelected
+      when :exit            ; A::Exit
       else
         A::NoAction
       end
     end
 
-    private def podcast_state
+    private def music_init_state
+      @ui.init_list({type: "music", value: ""})
       A::Init
     end
 
-    private def music_state
+    private def music_select_state
+      case music_select
+      when :selected; A::MusicSelected
+      when :back    ; A::Back
+      else
+        A::NoAction
+      end
+    end
+
+    private def radio_init_state
       @list.update if @list.outdated?
       A::Init
-    end
-
-    private def radio_state
-      @list.update if @list.outdated?
-      A::Init
-    end
-
-    private def list_parse_state
-      @list.parse unless @list.parsed
-      A::ListParsed
     end
 
     private def station_init_state
-#      @ui.list = @list
+      #      @ui.list = @list
+      @list.parse unless @list.parsed
       @ui.init_list({type: "stations", value: ""})
-      A::StationInit
+      A::Init
     end
 
     private def station_resume_state
@@ -129,7 +129,7 @@ module PodPicr
 
     private def show_init_state
       @ui.init_list({type: "shows", value: "#{@show}"})
-      A::ShowInit
+      A::Init
     end
 
     private def show_resume_state
@@ -212,6 +212,34 @@ module PodPicr
           return :exit
         when "char"
           monitor_playing res[:value]
+        end
+      end
+      :no_action
+    end
+
+    private def music_select
+      if res = @ui.music_monitor
+        case res[:action]
+        when "select"
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_music res[:value].to_s
+
+          #          when ""
+          #            return :podcast_selected
+          #          #when "Music"
+          #          #  return :music_selected
+          #          #when "Radio Stations"
+          #          #  return :radio_selected
+          #          else
+          #            raise "Error: Invalid category! (#{res[:value].inspect})"
+          #          end
+        when "back"
+          return :back unless res[:value] == "internal"
+          #        when "char"
+          #          monitor_playing res[:value]
+          #        end
+          #        end
         end
       end
       :no_action

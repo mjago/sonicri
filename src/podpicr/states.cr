@@ -2,10 +2,9 @@ module PodPicr
   enum UserState
     Init
     Categories
-    Podcast
-    Music
-    Radio
-    ListParse
+    MusicInit
+    MusicSelect
+    RadioInit
     StationInit
     StationResume
     StationSelect
@@ -21,21 +20,18 @@ module PodPicr
   enum UserAction
     NoAction
     Init
+    Back
+    Exit
     PodcastSelected
     MusicSelected
     RadioSelected
-    ListParsed
-    StationInit
     StationResumed
-    Back
     StationSelected
-    ShowInit
     ShowResumed
     ShowSelected
     EpisodeInit
     EpisodeInitCancelled
     EpisodeSelected
-    Exit
   end
 
   alias S = UserState
@@ -43,19 +39,19 @@ module PodPicr
 
   UserStates = [
     {st: S::Init, res: A::Init, to: S::Categories},
-    {st: S::Categories, res: A::PodcastSelected, to: S::Podcast},
-    {st: S::Categories, res: A::MusicSelected, to: S::Music},
-    {st: S::Categories, res: A::RadioSelected, to: S::Radio},
+    {st: S::Categories, res: A::PodcastSelected, to: S::StationInit},
+    {st: S::Categories, res: A::MusicSelected, to: S::MusicInit},
+    {st: S::Categories, res: A::RadioSelected, to: S::RadioInit},
     {st: S::Categories, res: A::Exit, to: S::Exit},
-    {st: S::Podcast, res: A::Init, to: S::ListParse},
-    {st: S::Music, res: A::Init, to: S::ListParse},
-    {st: S::Radio, res: A::Init, to: S::ListParse},
-    {st: S::ListParse, res: A::ListParsed, to: S::StationInit},
-    {st: S::StationInit, res: A::StationInit, to: S::StationSelect},
+    {st: S::RadioInit, res: A::Init, to: S::StationSelect},
+    {st: S::StationInit, res: A::Init, to: S::StationSelect},
+    {st: S::MusicInit, res: A::Init, to: S::MusicSelect},
+    {st: S::MusicSelect, res: A::MusicSelected, to: S::Exit},
+    {st: S::MusicSelect, res: A::Back, to: S::Init},
     {st: S::StationResume, res: A::StationResumed, to: S::StationSelect},
     {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
     {st: S::StationSelect, res: A::Back, to: S::Init},
-    {st: S::ShowInit, res: A::ShowInit, to: S::ShowSelect},
+    {st: S::ShowInit, res: A::Init, to: S::ShowSelect},
     {st: S::ShowResume, res: A::ShowResumed, to: S::ShowSelect},
     {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},
     {st: S::ShowSelect, res: A::Back, to: S::StationResume},

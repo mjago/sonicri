@@ -58,7 +58,7 @@ module PodPicr
       @running
     end
 
-    def move_to_file_cache (start = false)
+    def move_to_file_cache(start = false)
       current_pos = start ? 0_i64 : current_sample_offset
       @mpg.open(@cache_name)
       @mpg.param(:flags, :quiet, 0.0)
@@ -71,12 +71,29 @@ module PodPicr
       "cache/#{cache_name}.mp3"
     end
 
+    def play_music(file)
+      io = IO::Memory.new
+      @mpg.open(file)
+      @mpg.param(:flags, :quiet, 0.0)
+      @sample_length = @mpg.length
+      @mpg.seek(0_i64)
+      @source = :file
+      # move_to_file_cache(start = true)
+      # fiber_get_chunks(redir)
+      fiber_update_display
+      fiber_decode_chunks
+      fiber_play_chunks
+      fiber_monitor_download
+      @running = true
+      @pause = false
+    end
+
     def run(name, addr)
       @cache_name = make_cache_name(name)
       if File.exists? @cache_name
         io = IO::Memory.new
         move_to_file_cache(start = true)
-#        fiber_get_chunks(redir)
+        # fiber_get_chunks(redir)
         fiber_update_display
         fiber_decode_chunks
         fiber_play_chunks
@@ -164,9 +181,9 @@ module PodPicr
       @rate = @done = 0_i64
       @channels = encoding = 0
       @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
-#      puts "\n\n\r@rate #{@rate}"
+      #      puts "\n\n\r@rate #{@rate}"
       @bits = @mpg.encsize(encoding) * 8
-#      puts "\n\n\r@bits #{@bits}"
+      #      puts "\n\n\r@bits #{@bits}"
       #      exit
       byte_format = LibAO::Byte_Format::AO_FMT_BIG
       @ao.set_format(@bits, @rate, @channels, byte_format, matrix = nil)
