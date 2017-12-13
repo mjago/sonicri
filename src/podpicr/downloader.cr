@@ -3,6 +3,7 @@ require "http/client"
 module PodPicr
   class Downloader
     setter chunk_size
+    setter mode
     getter download_done
 
     def self.fetch(file_address, dest_name)
@@ -20,6 +21,7 @@ module PodPicr
       @chunk_size = 0
       @file = File.open("local.mp3", "wb")
       @download_done = false
+      @mode = :podcast
     end
 
     def quit
@@ -41,36 +43,17 @@ module PodPicr
 
     def get_chunks2
       channel = Channel(Bytes).new
-      #      chunk = Bytes.new(@chunk_size)
       chunk = Bytes.new(@chunk_size)
       spawn do
         while !@quit
           count = 0
           count = @file.read(chunk)
-          #   puts "count #{count}"
           quit if count == 0
           sized = chunk[0, count]
           channel.send(sized)
         end
       end
 
-      # HTTP::Client.get(redir) do |response|
-      #  length = 0 unless length = response.headers["Content-Length"].to_i
-      #  while !@quit
-      #    count = response.body_io.read(chunk)
-      #    quit if count == 0
-      #    break if @quit
-      #    unless length == 0
-      #      break if @quit
-      #    end
-      #    sized = chunk[0, count]
-      #       #     @file.write(sized)
-      #    channel.send(sized)
-      #  end
-      #  break if @quit
-      # end
-      # STDERR.print "."
-      # end
       STDERR.puts "quitting" if @quit
       return if @quit
       while chunk = channel.receive
@@ -84,7 +67,9 @@ module PodPicr
       spawn do
         count = 0
         HTTP::Client.get(redir) do |response|
-          length = 0 unless length = response.headers["Content-Length"].to_i
+          unless @mode == :radio
+            length = 0 unless length = response.headers["Content-Length"].to_i
+          end
           while !@quit
             count = response.body_io.read(chunk)
             if count == 0
@@ -93,11 +78,13 @@ module PodPicr
               break
             end
             break if @quit
-            unless length == 0
-              break if @quit
+            unless @mode == :radio
+              unless length == 0
+                break if @quit
+              end
             end
             sized = chunk[0, count]
-            @file.write(sized)
+            @file.write(sized) unless @mode == :radio
             channel.send(sized)
           end
           break if @quit

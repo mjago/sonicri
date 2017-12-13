@@ -5,6 +5,7 @@ module PodPicr
     MusicInit
     MusicSelect
     RadioInit
+    RadioSelect
     StationInit
     StationResume
     StationSelect
@@ -43,7 +44,9 @@ module PodPicr
     {st: S::Categories, res: A::MusicSelected, to: S::MusicInit},
     {st: S::Categories, res: A::RadioSelected, to: S::RadioInit},
     {st: S::Categories, res: A::Exit, to: S::Exit},
-    {st: S::RadioInit, res: A::Init, to: S::StationSelect},
+    {st: S::RadioInit, res: A::Init, to: S::RadioSelect},
+    {st: S::RadioSelect, res: A::RadioSelected, to: S::Init},
+    {st: S::RadioSelect, res: A::Back, to: S::Init},
     {st: S::StationInit, res: A::Init, to: S::StationSelect},
     {st: S::MusicInit, res: A::Init, to: S::MusicSelect},
     {st: S::MusicSelect, res: A::MusicSelected, to: S::Exit},

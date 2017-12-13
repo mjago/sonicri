@@ -71,6 +71,20 @@ module PodPicr
       "cache/#{cache_name}.mp3"
     end
 
+    def play_radio(url)
+      io = IO::Memory.new
+      redir = @dl.follow_redirects(url.not_nil!)
+      @mpg.open_feed
+      @dl.mode = :radio
+      fiber_get_chunks(redir)
+      fiber_update_display
+      fiber_decode_chunks
+      fiber_play_chunks
+      fiber_monitor_download
+      @running = true
+      @pause = false
+    end
+
     def play_music(file)
       io = IO::Memory.new
       @mpg.open(file)
@@ -181,10 +195,7 @@ module PodPicr
       @rate = @done = 0_i64
       @channels = encoding = 0
       @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
-      #      puts "\n\n\r@rate #{@rate}"
       @bits = @mpg.encsize(encoding) * 8
-      #      puts "\n\n\r@bits #{@bits}"
-      #      exit
       byte_format = LibAO::Byte_Format::AO_FMT_BIG
       @ao.set_format(@bits, @rate, @channels, byte_format, matrix = nil)
       @ao.open_live

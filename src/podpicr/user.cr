@@ -10,6 +10,7 @@ module PodPicr
           S::MusicInit     => ->music_init_state,
           S::MusicSelect   => ->music_select_state,
           S::RadioInit     => ->radio_init_state,
+          S::RadioSelect   => ->radio_select_state,
           S::StationInit   => ->station_init_state,
           S::StationResume => ->station_resume_state,
           S::StationSelect => ->station_select_state,
@@ -102,8 +103,17 @@ module PodPicr
     end
 
     private def radio_init_state
-      @list.update if @list.outdated?
+      @ui.init_list({type: "radio", value: ""})
       A::Init
+    end
+
+    private def radio_select_state
+      case radio_select
+      when :selected; A::RadioSelected
+      when :back    ; A::Back
+        else
+          A::NoAction
+      end
     end
 
     private def station_init_state
@@ -224,6 +234,22 @@ module PodPicr
           @audio.stop if @audio.running?
           await_audio_stop
           @audio.play_music res[:value]
+        when "back"
+          return :back unless res[:value] == "internal"
+        when "char"
+          monitor_playing res[:value]
+        end
+      end
+      :no_action
+    end
+
+    private def radio_select
+      if res = @ui.radio_monitor
+        case res[:action]
+        when "select"
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_radio res[:value]
         when "back"
           return :back unless res[:value] == "internal"
         when "char"

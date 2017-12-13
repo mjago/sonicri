@@ -18,6 +18,7 @@ module PodPicr
       @display_stack = Deque(Display).new
       @rss = RSS.new
       @music = Music.new
+      @radio = Radio.new
     end
 
     def close
@@ -36,6 +37,10 @@ module PodPicr
         @page.name = "Music"
         @display.page = @page
         @display.list = @music.albums
+      when "radio"
+        @page.name = "Radio"
+        @display.page = @page
+        @display.list = @radio.station_list
       when "stations"
         @page.name = "Stations"
         @display.page = @page
@@ -126,6 +131,26 @@ module PodPicr
             @display.list = @music.contents
             return {action: "back", value: "internal"}
           end
+        when "char"
+          return {action: "char", value: response[:value]}
+        end
+      end
+      return {action: "no_action", value: ""}
+    end
+
+    def radio_monitor
+      name = ""
+      response = @keys.check_input
+      if valid_response? response
+        case response[:action]
+        when "selection"
+          @display.redraw(response)
+        when "selected"
+          name = @radio.station_list[@display.selection]
+          url = @radio.url_of(name)
+          return {action: "select", value: url}
+        when "back"
+          return {action: "back", value: ""}
         when "char"
           return {action: "char", value: response[:value]}
         end
