@@ -111,8 +111,8 @@ module PodPicr
       case radio_select
       when :selected; A::RadioSelected
       when :back    ; A::Back
-        else
-          A::NoAction
+      else
+        A::NoAction
       end
     end
 

@@ -77,29 +77,23 @@ module PodPicr
       @mpg.open_feed
       @dl.mode = :radio
       fiber_get_chunks(redir)
-      fiber_update_display
-      fiber_decode_chunks
-      fiber_play_chunks
-      fiber_monitor_download
+      fiber_start_common_fibers
       @running = true
       @pause = false
     end
 
     def play_music(file)
-      io = IO::Memory.new
-      @mpg.open(file)
-      @mpg.param(:flags, :quiet, 0.0)
-      @sample_length = @mpg.length
-      @mpg.seek(0_i64)
-      @source = :file
-      # move_to_file_cache(start = true)
-      # fiber_get_chunks(redir)
-      fiber_update_display
-      fiber_decode_chunks
-      fiber_play_chunks
-      fiber_monitor_download
-      @running = true
-      @pause = false
+      if file
+        io = IO::Memory.new
+        @mpg.open(file)
+        @mpg.param(:flags, :quiet, 0.0)
+        @sample_length = @mpg.length
+        @mpg.seek(0_i64)
+        @source = :file
+        fiber_start_common_fibers
+        @running = true
+        @pause = false
+      end
     end
 
     def run(name, addr)
@@ -108,10 +102,7 @@ module PodPicr
         io = IO::Memory.new
         move_to_file_cache(start = true)
         # fiber_get_chunks(redir)
-        fiber_update_display
-        fiber_decode_chunks
-        fiber_play_chunks
-        fiber_monitor_download
+        fiber_start_common_fibers
         @running = true
         @pause = false
       else
@@ -119,10 +110,7 @@ module PodPicr
         redir = @dl.follow_redirects(addr)
         @mpg.open_feed
         fiber_get_chunks(redir)
-        fiber_update_display
-        fiber_decode_chunks
-        fiber_play_chunks
-        fiber_monitor_download
+        fiber_start_common_fibers
         @running = true
         @pause = false
       end
@@ -169,6 +157,10 @@ module PodPicr
 
     def jump_to(offset)
       @mpg.seek(offset, :seek_set)
+    end
+
+    def record
+      @dl.record
     end
 
     def pause
@@ -370,6 +362,13 @@ module PodPicr
       @mpg.exit
       @ao.exit
       @win = nil
+    end
+
+    private def fiber_start_common_fibers
+      fiber_update_display
+      fiber_decode_chunks
+      fiber_play_chunks
+      fiber_monitor_download
     end
   end
 end
