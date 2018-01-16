@@ -83,8 +83,7 @@ module PodPicr
       when :music_selected  ; A::MusicSelected
       when :radio_selected  ; A::RadioSelected
       when :exit            ; A::Exit
-      else
-        A::NoAction
+      else                  ; A::NoAction
       end
     end
 
@@ -97,8 +96,7 @@ module PodPicr
       case music_select
       when :selected; A::MusicSelected
       when :back    ; A::Back
-      else
-        A::NoAction
+      else          ; A::NoAction
       end
     end
 
@@ -111,8 +109,7 @@ module PodPicr
       case radio_select
       when :selected; A::RadioSelected
       when :back    ; A::Back
-      else
-        A::NoAction
+      else          ; A::NoAction
       end
     end
 
@@ -151,8 +148,7 @@ module PodPicr
       case show_select
       when :selected; A::ShowSelected
       when :back    ; A::Back
-      else
-        A::NoAction
+      else          ; A::NoAction
       end
     end
 
@@ -322,7 +318,6 @@ module PodPicr
 
     private def do_exit
       @ui.try { |ui| ui.close }
-      NCurses.end_win
       puts "done"
       exit(0)
     end

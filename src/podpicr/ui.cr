@@ -91,7 +91,6 @@ module PodPicr
           category = @categories[@display.selected]
           return {action: "select", value: category}
         when "back"
-          resume
           return {action: "back", value: ""}
         when "char"
           return {action: "char", value: response[:value]}
