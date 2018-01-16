@@ -7,6 +7,7 @@ require "time"
 module PodPicr
   class Audio
     setter win : NCurses::Window | Nil
+
     include Libao
     include Libmpg123
 
@@ -47,10 +48,10 @@ module PodPicr
     end
 
     def quit
-      #      stop
       @mpg.exit
       @dl.quit
       @quit = true
+      @ao.exit
       @io.flush
     end
 
@@ -306,7 +307,8 @@ module PodPicr
       when LibMPG::Errors::OK.value
         @ch_play.send(nil)
       when LibMPG::Errors::NEED_MORE.value
-        #        quit if @source == :file
+      #        quit if @source == :file
+#        puts "here\r"
       when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       end
@@ -359,8 +361,7 @@ module PodPicr
 
     private def close
       sleep 0.1
-      @mpg.exit
-      @ao.exit
+      quit
       @win = nil
     end
 

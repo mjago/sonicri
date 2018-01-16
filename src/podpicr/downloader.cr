@@ -41,55 +41,41 @@ module PodPicr
       return follow_redirects(location)
     end
 
-    def get_chunks2
-      channel = Channel(Bytes).new
-      chunk = Bytes.new(@chunk_size)
-      spawn do
-        while !@quit
-          count = 0
-          count = @file.read(chunk)
-          quit if count == 0
-          sized = chunk[0, count]
-          channel.send(sized)
-        end
-      end
-
-      STDERR.puts "quitting" if @quit
-      return if @quit
-      while chunk = channel.receive
-        yield chunk
-      end
-    end
-
     def get_chunks(redir : String)
       channel = Channel(Bytes).new
       chunk = Bytes.new(@chunk_size)
-      spawn do
-        count = 0
-        HTTP::Client.get(redir) do |response|
-          unless @mode == :radio
-            length = 0 unless length = response.headers["Content-Length"].to_i
-          end
-          while !@quit
-            count = response.body_io.read(chunk)
-            if count == 0
-              @file.close
-              quit
-              break
+      begin
+        spawn do
+          count = 0
+          HTTP::Client.get(redir) do |response|
+            unless @mode == :radio
+              length = 0 unless length = response.headers["Content-Length"].to_i
+            end
+            while !@quit
+              count = response.body_io.read(chunk)
+              if count == 0
+                @file.close
+                quit
+                break
+              end
+              break if @quit
+              unless @mode == :radio
+                unless length == 0
+                  break if @quit
+                end
+              end
+              sized = chunk[0, count]
+              @file.write(sized) unless @mode == :radio
+              channel.send(sized)
             end
             break if @quit
-            unless @mode == :radio
-              unless length == 0
-                break if @quit
-              end
-            end
-            sized = chunk[0, count]
-            @file.write(sized) unless @mode == :radio
-            channel.send(sized)
           end
-          break if @quit
+          @download_done = true
         end
-        @download_done = true
+      rescue
+        quit
+        puts "Exception raised in downloader - quitting:"
+        sleep 1
       end
       STDERR.puts "quitting" if @quit
       return if @quit
