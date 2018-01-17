@@ -6,6 +6,7 @@
 	</head>
 	<body>
 		<outline text="Music For Programming" description="Music For Programming" title="Debug Show" xmlUrl="http://musicforprogramming.net/rss.php"/>
+		<outline text="Command Line Heroes" description="Redhat Podcast" title="Command Line Heroes" xmlUrl="https://feeds.pacific-content.com/commandlineheroes"/>
 		<outline text="Debug Show" description="Developer Podcast." title="Debug Show" xmlUrl="feeds.feedburner.com/debugshow"/>
 		<outline text="A Taste of Russian" description="Welcome to our Russian podcasts â€śTaste of Russianâ€ť. If you wish to improve your listening and speaking skills in Russian, we are glad to help you. Be sure, it isnâ€™t a boring Grammar course, it is a real chat on different topics which can be heard in everyday life. It is a chance to listen to the native speakers talking at home, at work, at the shop, at the party, etc." title="A Taste of Russian" type="rss" version="RSS2" htmlUrl="http://tasteofrussian.com" xmlUrl="http://recap.ltd.uk/podcasting/rss/atasteofrussian.rss"/>
 		<outline text="Ace Kids" description="A Year 5/6 class and their teacher in Ballina Australia are experimenting with creating their very own 'Internet Radio Station'/Podcast. This is a project that will evolve as our knowlege of software and process increase. See what you think of our initial efforts." title="Ace Kids" type="rss" version="RSS2" htmlUrl="http://www.adrianbruce.com/acekids/" xmlUrl="http://recap.ltd.uk/podcasting/rss/acekids2.rss"/>
