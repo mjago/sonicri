@@ -51,7 +51,6 @@ module PodPicr
       @mpg.exit
       @dl.quit
       @quit = true
-      @ao.exit
       @io.flush
     end
 
@@ -362,6 +361,7 @@ module PodPicr
     private def close
       sleep 0.1
       quit
+      @ao.exit
       @win = nil
     end
 
