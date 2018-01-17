@@ -1,14 +1,15 @@
 name: PodPicr
 version: 0.1.0
 
+description: A Command Line Audio Player
 authors:
   - mjago <martyn.jago@btinternet.com>
 
 targets:
-  podcast:
+  podpicr:
     main: src/podpicr.cr
 
-crystal: 0.23.0
+crystal: 0.24.1
 
 license: MIT
 
