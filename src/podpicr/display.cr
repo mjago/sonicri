@@ -19,6 +19,7 @@ module PodPicr
 
     def initialize(@page : Page)
       NCurses.init
+      NCurses.attempt_remove_cursor
       NCurses.cbreak
       NCurses.no_echo
       NCurses.start_color
