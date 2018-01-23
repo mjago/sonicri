@@ -44,6 +44,7 @@ module PodPicr
     def get_chunks(redir : String)
       channel = Channel(Bytes).new
       chunk = Bytes.new(@chunk_size)
+      temp = Bytes.new(0)
       begin
         spawn do
           count = 0
@@ -64,9 +65,15 @@ module PodPicr
                   break if @quit
                 end
               end
-              sized = chunk[0, count]
-              @file.write(sized) unless @mode == :radio
-              channel.send(sized)
+              temp = Bytes.new(temp.size + count) { |i| i < temp.size ? temp[i] : chunk[i - temp.size] }
+              Fiber.yield
+              if temp.size >= @chunk_size * 2
+                temp[0, temp.size].tap do |sized|
+                  @file.write(sized) unless @mode == :radio
+                  channel.send(sized)
+                end
+                temp = Bytes.new(0)
+              end
             end
             break if @quit
           end

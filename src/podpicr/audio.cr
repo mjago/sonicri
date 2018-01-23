@@ -101,7 +101,6 @@ module PodPicr
       if File.exists? @cache_name
         io = IO::Memory.new
         move_to_file_cache(start = true)
-        # fiber_get_chunks(redir)
         fiber_start_common_fibers
         @running = true
         @pause = false
@@ -242,8 +241,27 @@ module PodPicr
       spawn do
         while !@quit
           display_progress
-          sleep 1.0
+          sleep 0.1
         end
+      end
+    end
+
+    private def display_progress
+      if win = @win
+        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
+        if (rate = @rate) > 0
+          offset = @mpg.sample_offset
+          sec = offset / @rate
+          if @source == :file && @rate > 0
+            @file_size = @sample_length / @rate
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}          ")
+          else
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate} ")
+          end
+          win.refresh
+        end
+      else
+        raise "Error: no Window!"
       end
     end
 
@@ -260,32 +278,6 @@ module PodPicr
           end
           sleep 0.5
         end
-      end
-    end
-
-    private def display_progress
-      if win = @win
-        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-        if (rate = @rate) > 0
-          offset = @mpg.sample_offset
-          sec = offset / @rate
-          if @source == :file && @rate > 0
-            @file_size = @sample_length / @rate
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}          ")
-          else
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
-          end
-          #          win.print("offset: #{offset}")
-          win.refresh
-        end
-
-        #        if @total_size > 0_i64
-        #          win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-        #          win.print(info_line)
-        #          win.refresh
-        #        end
-      else
-        raise "Error: no Window!"
       end
     end
 
@@ -306,8 +298,6 @@ module PodPicr
       when LibMPG::Errors::OK.value
         @ch_play.send(nil)
       when LibMPG::Errors::NEED_MORE.value
-      #        quit if @source == :file
-#        puts "here\r"
       when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       end
