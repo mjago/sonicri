@@ -66,7 +66,6 @@ module PodPicr
                 end
               end
               temp = Bytes.new(temp.size + count) { |i| i < temp.size ? temp[i] : chunk[i - temp.size] }
-              Fiber.yield
               if temp.size >= @chunk_size * 2
                 temp[0, temp.size].tap do |sized|
                   @file.write(sized) unless @mode == :radio
