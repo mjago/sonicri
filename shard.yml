@@ -1,5 +1,5 @@
 name: PodPicr
-version: 0.1.0
+version: 0.2.0
 
 description: A Command Line Audio Player
 authors:
@@ -23,6 +23,3 @@ dependencies:
   libmpg123:
     github: mjago/libmpg123
     branch: master
-
-
-

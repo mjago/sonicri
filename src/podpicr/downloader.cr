@@ -2,10 +2,10 @@ require "http/client"
 
 module PodPicr
   class Downloader
-    setter chunk_size
     setter mode
     getter download_done
 
+    BUF_SIZE = 4800
     def self.fetch(file_address, dest_name)
       begin
         HTTP::Client.get(file_address) do |response|
@@ -18,10 +18,13 @@ module PodPicr
 
     def initialize
       @quit = false
-      @chunk_size = 0
-      @file = File.open("local.mp3", "wb")
       @download_done = false
+      @restart_count = 0
+      @file = File.open("local.mp3", "wb")
       @mode = :podcast
+      @io = IO::Memory.new
+      @q = Deque(UInt8).new(BUF_SIZE)
+      @chunk = Bytes.new(BUF_SIZE)
     end
 
     def quit
@@ -41,42 +44,69 @@ module PodPicr
       return follow_redirects(location)
     end
 
+    def process_response(response)
+      count = response.body_io.read @chunk
+      if count == 0
+        @file.close
+        quit
+      end
+      count.times{ |x| @q.push @chunk[x]}
+      return nil if @quit
+      qsize = @q.size
+      if qsize >= BUF_SIZE * 3
+        return Slice(UInt8).new(qsize) { @q.shift }
+      end
+      nil
+    end
+
+    def new_client(uri)
+      begin
+        client = HTTP::Client.new(uri) # do |response|
+        client.read_timeout = 10
+        return client
+      rescue err : IO::Timeout
+        raise "Error: failed to open #{uri}"
+      end
+    end
+
     def get_chunks(redir : String)
       channel = Channel(Bytes).new
-      chunk = Bytes.new(@chunk_size)
-      temp = Bytes.new(0)
       begin
         spawn do
-          count = 0
-          HTTP::Client.get(redir) do |response|
-            unless @mode == :radio
-              length = 0 unless length = response.headers["Content-Length"].to_i
-            end
-            while !@quit
-              count = response.body_io.read(chunk)
-              if count == 0
-                @file.close
-                quit
-                break
-              end
-              break if @quit
-              unless @mode == :radio
-                unless length == 0
-                  break if @quit
+          retry_count = 0
+          @restart_count = 0
+          loop do
+            @restart = false
+            uri = URI.parse(redir)
+            if client = new_client(uri)
+              begin
+                client.get(uri.full_path) do |response|
+                  while !@quit
+                    if audio = process_response(response)
+                      channel.send(audio)
+                      @restart_count = 0
+                      @file.write(audio) unless @mode == :radio
+                    else
+                      @restart_count += 1
+                      if @restart_count > 20
+                        @restart = true
+                        retry_count += 1
+                        raise "too many retries" if retry_count > 5
+                        @restart_count = 0
+                        puts "restarting"
+                        break
+                      end
+                    end
+                  end
                 end
-              end
-              temp = Bytes.new(temp.size + count) { |i| i < temp.size ? temp[i] : chunk[i - temp.size] }
-              if temp.size >= @chunk_size * 2
-                temp[0, temp.size].tap do |sized|
-                  @file.write(sized) unless @mode == :radio
-                  channel.send(sized)
-                end
-                temp = Bytes.new(0)
+              rescue err : IO::Timeout
+                @restart = true
+                @q.clear
               end
             end
-            break if @quit
+            @download_done = true unless @restart
+            break unless @restart
           end
-          @download_done = true
         end
       rescue
         quit
@@ -87,6 +117,7 @@ module PodPicr
       return if @quit
       while chunk = channel.receive
         yield chunk
+        sleep 0.005
       end
     end
   end

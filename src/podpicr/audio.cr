@@ -12,31 +12,26 @@ module PodPicr
     include Libmpg123
 
     BUF_SIZE         = 4800
-    INFO_LINE_LENGTH =   55
     INFO_POS_ROW     =   23
     INFO_POS_COL     =    0
 
     def initialize
       @source = :feed
-      @io_readpos = @done = @rate =
-        @total_size = @file_end = 0_i64
+      @done = @rate = 0_i64
       @channels = @bits = 0
       @running = @quit = false
       @ao = Ao.new
       @dl = Downloader.new
-      @dl.chunk_size = BUF_SIZE
       @ch_play = Channel(Nil).new
-      @io = IO::Memory.new
-      @inslice = Bytes.new(BUF_SIZE)
       @auxslice = Bytes.new(BUF_SIZE)
       @ao_buf = Bytes.new(BUF_SIZE)
-      @read_count = 1
-      @seek_value = 0_i64
       @mpg = Mpg123.new
       @mpg.new(nil)
+      @mpg.param(:flags, :quiet)
       @cache_name = ""
       @file_size = 0_i64
       @sample_length = 0_i64
+      @q = Deque(UInt8).new(BUF_SIZE)
     end
 
     def stop
@@ -51,7 +46,7 @@ module PodPicr
       @mpg.exit
       @dl.quit
       @quit = true
-      @io.flush
+      @q.clear
     end
 
     def running?
@@ -72,7 +67,6 @@ module PodPicr
     end
 
     def play_radio(url)
-      io = IO::Memory.new
       redir = @dl.follow_redirects(url.not_nil!)
       @mpg.open_feed
       @dl.mode = :radio
@@ -84,7 +78,6 @@ module PodPicr
 
     def play_music(file)
       if file
-        io = IO::Memory.new
         @mpg.open(file)
         @mpg.param(:flags, :quiet, 0.0)
         @sample_length = @mpg.length
@@ -99,13 +92,11 @@ module PodPicr
     def run(name, addr)
       @cache_name = make_cache_name(name)
       if File.exists? @cache_name
-        io = IO::Memory.new
         move_to_file_cache(start = true)
         fiber_start_common_fibers
         @running = true
         @pause = false
       else
-        io = IO::Memory.new
         redir = @dl.follow_redirects(addr)
         @mpg.open_feed
         fiber_get_chunks(redir)
@@ -166,20 +157,17 @@ module PodPicr
       @pause = @pause ? false : true
     end
 
-    private def io_write(slice : Bytes)
-      @io.pos = @io.size
-      @io.write(slice)
+    private def q_write(slice : Bytes)
+      slice.each do |x|
+        @q.push x
+      end
     end
 
-    private def io_read(slice)
-      @io.pos = @io_readpos
-      @io.read(slice)
-      @io_readpos = @io.pos.to_i64
-      slice
-    end
-
-    private def io_bytes_count
-      @io.size - @io_readpos
+    private def q_read
+      size = @q.size
+      if size >= BUF_SIZE
+        return Bytes.new(size) { |x| @q.shift }
+      end
     end
 
     private def set_audio_format
@@ -193,17 +181,20 @@ module PodPicr
     end
 
     private def decode(inp, insize, outsize)
-      @mpg.decode(inp, insize.to_i64,
-        @ao_buf,
-        outsize.to_i64,
-        pointerof(@done))
+      if input = inp
+        @mpg.decode(input, insize.to_i64,
+                    @ao_buf,
+                    outsize.to_i64,
+                    pointerof(@done))
+      end
     end
 
     private def fiber_get_chunks(redir)
       spawn do
         @dl.get_chunks(redir) do |chunk|
-          io_write chunk
+          q_write chunk
           break if @quit
+          Fiber.yield
         end
       end
     end
@@ -211,8 +202,9 @@ module PodPicr
     private def fiber_get_chunks
       spawn do
         @dl.get_chunks do |chunk|
-          io_write chunk
+          q_write chunk
           break if @quit
+          Fiber.yield
         end
       end
     end
@@ -229,34 +221,26 @@ module PodPicr
       display("Playing (streaming)...    ")
     end
 
-    private def update_display?(then)
-      epoch = now
-      if (then + 5) < epoch
-        return true
-      end
-      false
-    end
-
     private def fiber_update_display
       spawn do
         while !@quit
           display_progress
-          sleep 0.1
+          sleep 1
         end
       end
     end
 
     private def display_progress
-      if win = @win
+      if (win = @win) && (rate = @rate)
         win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-        if (rate = @rate) > 0
+        if rate > 0
           offset = @mpg.sample_offset
-          sec = offset / @rate
-          if @source == :file && @rate > 0
-            @file_size = @sample_length / @rate
+          sec = offset / rate
+          if @source == :file && rate > 0
+            @file_size = @sample_length / rate
             win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}          ")
           else
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate} ")
+            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{rate} ")
           end
           win.refresh
         end
@@ -276,17 +260,9 @@ module PodPicr
               break
             end
           end
-          sleep 0.5
+          sleep 1
         end
       end
-    end
-
-    private def info_line
-      info = "Rate: #{@rate}/#{@bits}, Size: #{@total_size}"
-      while info.size < INFO_LINE_LENGTH
-        info += " "
-      end
-      info
     end
 
     private def process_result(result)
@@ -304,14 +280,6 @@ module PodPicr
       sleep 0
     end
 
-    private def get_data_size
-      size = 0
-      unless io_bytes_count == 0
-        size = io_bytes_count > BUF_SIZE ? BUF_SIZE : io_bytes_count
-      end
-      size
-    end
-
     private def fiber_decode_chunks
       spawn do
         while !@quit
@@ -320,19 +288,19 @@ module PodPicr
             break if @quit
           end
           break if @quit
-          outsize = BUF_SIZE
           data = nil
-          size = get_data_size
-          unless size == 0
-            data = io_read @inslice
-            @total_size += size
+          size = @q.size
+          if size >= BUF_SIZE
+            data = q_read
           else
+            Fiber.yield
             size = 0_i64
             data = @auxslice
           end
-          result = decode(data, size, outsize)
+          size1 = size
+          result = decode(inp: data, insize: size, outsize: BUF_SIZE)
           process_result(result)
-          Fiber.yield
+          sleep 0.01 if size1 == 0_i64
         end
       end
     end

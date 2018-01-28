@@ -33,12 +33,9 @@ module PodPicr
     end
 
     def run
-      #     @list.update
-      #      @list.parse
-      #      do_exit
       loop do
         process_user_state
-        do_events()
+        do_events
       end
     end
 
@@ -182,7 +179,7 @@ module PodPicr
     end
 
     private def do_events
-      sleep(0.001)
+      sleep 0.1
     end
 
     private def station_select
