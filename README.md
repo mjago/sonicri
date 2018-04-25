@@ -2,7 +2,7 @@
 
 ## Audio Player
 
-![Screenshot](https://github.com/mjago/sonicri/blob/2138f9f7ad110985428a19e64923cc49556467d7/images/screenshot.png)
+![Screenshot](https://github.com/mjago/sonicri/blob/47e2c13232d051ff33e4159c0c02ab4467f5d2e9/images/screenshot.png)
 
 ### Plays:
  - Podcasts
