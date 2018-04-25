@@ -1,5 +1,5 @@
-name: PodPicr
-version: 0.2.0
+name: Sonicri
+version: 1.0.0
 
 description: A Command Line Audio Player
 authors:
@@ -7,7 +7,7 @@ authors:
 
 targets:
   podpicr:
-    main: src/podpicr.cr
+    main: src/sonicri.cr
 
 crystal: 0.24.2
 
