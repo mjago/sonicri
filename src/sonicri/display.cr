@@ -39,7 +39,7 @@ module Sonicri
         @window.print(" " * ((@page.line_size) + 6))
         @window.move(0, (@page.line_size / 2) - 3)
         @window.with_attr(:bold) do
-          @window.print("Pod Picr")
+          @window.print("Sonicri")
         end
         @window.move(1, 0)
         @window.refresh
