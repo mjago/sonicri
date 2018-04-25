@@ -9,14 +9,14 @@ targets:
   podpicr:
     main: src/podpicr.cr
 
-crystal: 0.24.1
+crystal: 0.24.2
 
 license: MIT
 
 dependencies:
   ncurses:
-    github: mjago/ncurses-crystal
-    branch: attr_mask_fix
+    github: jreinert/ncurses-crystal
+    branch: 815265a0cae78f94374b8c46830d0fcc2e7a0f4b
   libao:
     github: mjago/libao
     branch: master
