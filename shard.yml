@@ -15,8 +15,8 @@ license: MIT
 
 dependencies:
   ncurses:
-    github: jreinert/ncurses-crystal
-    branch: 815265a0cae78f94374b8c46830d0fcc2e7a0f4b
+    github: mjago/ncurses-crystal
+    branch: sonicri-branch
   libao:
     github: mjago/libao
     branch: master
