@@ -1,4 +1,4 @@
 require "./podpicr/*"
 
-ppr = PodPicr::User.new
+ppr = Sonicri::User.new
 ppr.run

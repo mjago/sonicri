@@ -1,6 +1,6 @@
 require "ncurses"
 
-module PodPicr
+module Sonicri
   class Display
     TitleColor        = 1
     SelectColor       = 2

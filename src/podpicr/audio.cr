@@ -4,7 +4,7 @@ require "libao"
 require "libmpg123"
 require "time"
 
-module PodPicr
+module Sonicri
   class Audio
     setter win : NCurses::Window | Nil
 

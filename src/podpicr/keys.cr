@@ -1,6 +1,6 @@
 require "file"
 
-module PodPicr
+module Sonicri
   class Keys
     def initialize(@win : NCurses::Window)
       @file = File.open("check_keys.org", "w")

@@ -1,6 +1,6 @@
 require "ncurses"
 
-module PodPicr
+module Sonicri
   class UI
     setter list : List
     getter display : Display

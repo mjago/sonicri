@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   struct Page
     property line_size, page_size, page_start
     property selection, selected

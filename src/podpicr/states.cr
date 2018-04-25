@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   enum UserState
     Init
     Categories

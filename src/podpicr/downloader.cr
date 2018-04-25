@@ -1,6 +1,6 @@
 require "http/client"
 
-module PodPicr
+module Sonicri
   class Downloader
     setter mode
     getter download_done

@@ -1,6 +1,6 @@
 # coding: utf-8
 
-module PodPicr
+module Sonicri
   class Radio
     struct RStation
       property :name
@@ -159,5 +159,5 @@ module PodPicr
   end
 end
 
-# rs = PodPicr::Radio.new
+# rs = Sonicri::Radio.new
 # puts rs.stations.inspect

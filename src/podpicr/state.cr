@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   class State
     def initialize(@state_table : Array({st: S, res: A, to: S}))
       @queue = [] of A

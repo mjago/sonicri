@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   class User
     @states : Hash(S, Proc(A))
 

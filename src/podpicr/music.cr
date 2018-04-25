@@ -1,7 +1,7 @@
 # coding: utf-8
 
-module PodPicr
-  MUSIC_ROOT = "/Users/martyn/Music/new/"
+module Sonicri
+  MUSIC_ROOT = "/home/martyn/Music/new/"
 
   class Music
     getter :albums
@@ -30,11 +30,11 @@ module PodPicr
     end
 
     def parse_music_files(file)
-      @albums = [] of String
+      temp = [] of String
       Dir.children(File.join(MUSIC_ROOT, file)).each do |b|
-        @albums << b if directory?(b) || mp3_file?(b)
+        temp << b if directory?(b) || mp3_file?(b)
       end
-      @albums
+      @albums = temp.sort { |x, y| x <=> y }
     end
 
     def directory?(file)

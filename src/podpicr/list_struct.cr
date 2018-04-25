@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   struct ListStruct
     property station, text, description, url
 

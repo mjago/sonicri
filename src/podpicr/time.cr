@@ -1,4 +1,4 @@
-module PodPicr
+module Sonicri
   class Time
     getter :now
 

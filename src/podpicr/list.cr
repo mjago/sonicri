@@ -2,7 +2,7 @@ require "xml"
 require "colorize"
 require "file_utils"
 
-module PodPicr
+module Sonicri
   class List
     TEMP_LIST    = "temp.opml"
     DEBUG_LIST   = false
@@ -76,7 +76,7 @@ module PodPicr
     end
 
     def outdated? # todo
-      time = PodPicr::Time.new
+      time = Sonicri::Time.new
       false
       # true
     end

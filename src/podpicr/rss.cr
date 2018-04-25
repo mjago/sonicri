@@ -1,6 +1,6 @@
 require "xml"
 
-module PodPicr
+module Sonicri
   class RSS
     TEMP_RSS = "/tmp/tmp.rss"
     RSS_FILE = "program.rss"
