@@ -6,7 +6,7 @@ authors:
   - mjago <martyn.jago@btinternet.com>
 
 targets:
-  podpicr:
+  sonicri:
     main: src/sonicri.cr
 
 crystal: 0.24.2
