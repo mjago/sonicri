@@ -22,15 +22,15 @@ Customise *local music root directory* by editing *music_root.rc*
 ## Usage
 
  - *Arrow keys* to navigate menus
- - *RETURN* to play
+ - *RETURN* to play or *enter selection menu*
  - *p* to pause
  - *f* to skip-forward (10 sec)
  - *F* to skip-forward (1 minute)
  - *b* to skip-backward (10 sec)
  - *B* to skip-backward (1 minute)
  - *s* to stop
- - *q / ESCAPE* to quit / back up menu
+ - *BACKSPACE or ESCAPE or q* to *climb back up menu* / quit
 
 ## Contributors
 
-- [mjago](https://github.com/mjago) - creator
+- [mjago](https://github.com/mjago/sonicri)
