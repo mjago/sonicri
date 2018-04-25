@@ -2,6 +2,8 @@
 
 ## Audio Player
 
+![Screenshot](https://github.com/mjago/sonicri/blob/b8177df59b458d6ec7f4ab851680eb7074e6bc48/images/screenshot.png)
+
 ### Plays:
  - Podcasts
  - Local Files
