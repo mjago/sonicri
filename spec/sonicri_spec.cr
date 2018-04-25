@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe "PodPicr tests go here!" do
+describe "Sonicri tests go here!" do
   # TODO: Write tests
 
   it "pretend it works for now" do
