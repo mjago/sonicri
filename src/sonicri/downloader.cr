@@ -6,6 +6,7 @@ module Sonicri
     getter download_done
 
     BUF_SIZE = 4800
+
     def self.fetch(file_address, dest_name)
       begin
         HTTP::Client.get(file_address) do |response|
@@ -50,7 +51,7 @@ module Sonicri
         @file.close
         quit
       end
-      count.times{ |x| @q.push @chunk[x]}
+      count.times { |x| @q.push @chunk[x] }
       return nil if @quit
       qsize = @q.size
       if qsize >= BUF_SIZE * 3

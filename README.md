@@ -17,6 +17,8 @@ Requires:
  - libncurses(w)
  - libgpm
 
+Customise *local music root directory* by editing *music_root.rc*
+
 ## Usage
 
  - *Arrow keys* to navigate menus

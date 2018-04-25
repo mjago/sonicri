@@ -80,7 +80,7 @@ module Sonicri
       when :music_selected  ; A::MusicSelected
       when :radio_selected  ; A::RadioSelected
       when :exit            ; A::Exit
-      else                  ; A::NoAction
+      else                    A::NoAction
       end
     end
 
@@ -93,7 +93,7 @@ module Sonicri
       case music_select
       when :selected; A::MusicSelected
       when :back    ; A::Back
-      else          ; A::NoAction
+      else            A::NoAction
       end
     end
 
@@ -106,7 +106,7 @@ module Sonicri
       case radio_select
       when :selected; A::RadioSelected
       when :back    ; A::Back
-      else          ; A::NoAction
+      else            A::NoAction
       end
     end
 
@@ -145,7 +145,7 @@ module Sonicri
       case show_select
       when :selected; A::ShowSelected
       when :back    ; A::Back
-      else          ; A::NoAction
+      else            A::NoAction
       end
     end
 

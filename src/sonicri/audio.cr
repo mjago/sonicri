@@ -11,9 +11,9 @@ module Sonicri
     include Libao
     include Libmpg123
 
-    BUF_SIZE         = 4800
-    INFO_POS_ROW     =   23
-    INFO_POS_COL     =    0
+    BUF_SIZE     = 4800
+    INFO_POS_ROW =   23
+    INFO_POS_COL =    0
 
     def initialize
       @source = :feed
@@ -183,9 +183,9 @@ module Sonicri
     private def decode(inp, insize, outsize)
       if input = inp
         @mpg.decode(input, insize.to_i64,
-                    @ao_buf,
-                    outsize.to_i64,
-                    pointerof(@done))
+          @ao_buf,
+          outsize.to_i64,
+          pointerof(@done))
       end
     end
 

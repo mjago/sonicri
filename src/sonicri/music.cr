@@ -1,7 +1,7 @@
 # coding: utf-8
 
 module Sonicri
-  MUSIC_ROOT = "/home/martyn/Music/new/"
+  MUSIC_ROOT = File.expand_path(File.read("./music_root.rc").strip)
 
   class Music
     getter :albums
