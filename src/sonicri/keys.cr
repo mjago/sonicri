@@ -7,8 +7,35 @@ module Sonicri
     DEBUG = false
 
     def initialize(@win : NCurses::Window)
+      @key_stack = Deque(NamedTuple(action: String, value: String)).new
+      monitor_keyboard
       @file = File.open("check_keys.org", "w") if DEBUG
       debug_puts "* check_file" if DEBUG
+    end
+
+    private def monitor_keyboard
+      spawn do
+        loop do
+          response = check_input
+          if valid_response? response
+            if @key_stack.empty?
+              @key_stack.push response
+            end
+          end
+        end
+      end
+    end
+
+    def next_key
+      @key_stack.shift
+    end
+
+    def key_available?
+      ! @key_stack.empty?
+    end
+
+    private def valid_response?(response)
+      response.class == NamedTuple(action: String, value: String)
     end
 
     def check_input
