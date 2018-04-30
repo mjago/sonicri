@@ -225,7 +225,7 @@ module Sonicri
       spawn do
         while !@quit
           display_progress
-          sleep 1
+          sleep 0.1
         end
       end
     end
