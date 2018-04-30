@@ -16,9 +16,11 @@ module Sonicri
       @title = ""
       @program = ""
       @display_stack = Deque(Display).new
+      @key_stack = Deque(NamedTuple(action: String, value: String)).new
       @rss = RSS.new
       @music = Music.new
       @radio = Radio.new
+      monitor_keyboard
     end
 
     def close
@@ -79,9 +81,32 @@ module Sonicri
       {url: url, length: length}
     end
 
+    def monitor_keyboard
+      spawn do
+        loop do
+          response = @keys.check_input
+          if valid_response? response
+            if @key_stack.empty?
+              @key_stack.push response
+            end
+          end
+        end
+      end
+    end
+
+    def next_key
+      @key_stack.shift
+    end
+
+    def key_available?
+      ! @key_stack.empty?
+    end
+
     def category_monitor
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)
@@ -100,8 +125,10 @@ module Sonicri
 
     def music_monitor
       name = ""
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)
@@ -139,8 +166,10 @@ module Sonicri
 
     def radio_monitor
       name = ""
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)
@@ -158,8 +187,10 @@ module Sonicri
     end
 
     def stations_monitor
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)
@@ -177,8 +208,10 @@ module Sonicri
     end
 
     def shows_monitor
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)
@@ -197,8 +230,10 @@ module Sonicri
     end
 
     def episodes_monitor
-      response = @keys.check_input
-      if valid_response? response
+      if key_available?
+        response = next_key
+        #     response = @keys.check_input
+        #     if valid_response? response
         case response[:action]
         when "selection"
           @display.redraw(response)

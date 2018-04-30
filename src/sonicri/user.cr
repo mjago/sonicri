@@ -43,6 +43,7 @@ module Sonicri
 
     private def process_user_state
       if (stproc = @states[@state.state]?)
+        Fiber.yield
         call_state stproc
       else
         raise "state proc is nil in User#process_user_state"
@@ -54,6 +55,7 @@ module Sonicri
       unless ret.is_a? A
         raise "Error: Invalid action (#{ret}) in User#call_state!"
       end
+      Fiber.yield
       action ret
     end
 

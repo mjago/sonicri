@@ -277,7 +277,7 @@ module Sonicri
       when LibMPG::Errors::BAD_HANDLE.value
         raise("Error: Bad Handle in PlayAudio")
       end
-      sleep 0
+      Fiber.yield
     end
 
     private def fiber_decode_chunks
@@ -311,7 +311,7 @@ module Sonicri
         while !@quit
           @ch_play.receive
           @ao.play(@ao_buf, @done)
-          sleep 0
+          Fiber.yield
         end
       end
     end
