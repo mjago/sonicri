@@ -63,7 +63,7 @@ module Sonicri
     def new_client(uri)
       begin
         client = HTTP::Client.new(uri) # do |response|
-        client.read_timeout = 10
+        client.read_timeout = 30
         return client
       rescue err : IO::Timeout
         raise "Error: failed to open #{uri}"
