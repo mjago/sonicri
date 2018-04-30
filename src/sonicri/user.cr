@@ -61,10 +61,6 @@ module Sonicri
       @state.action(act)
     end
 
-    private def action_if(res, act : A)
-      action act unless (res == false)
-    end
-
     # states
 
     private def init_state
