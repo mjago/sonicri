@@ -2,9 +2,13 @@ require "file"
 
 module Sonicri
   class Keys
+
+    @file : File | Nil
+    DEBUG = false
+
     def initialize(@win : NCurses::Window)
-      @file = File.open("check_keys.org", "w")
-      @file.puts "* check_file"
+      @file = File.open("check_keys.org", "w") if DEBUG
+      debug_puts "* check_file" if DEBUG
     end
 
     def check_input
@@ -14,17 +18,24 @@ module Sonicri
     end
 
     def close
-      @file.close
+      if f = @file
+        f.close
+      end
+    end
+
+    def debug_puts(x)
+      if file = @file
+        file.puts x
+      end
     end
 
     def try_key(win)
       esc = 0
       loop do
         char = win.get_char
-
         if char > -1
           if esc == 0
-            @file.puts "get_char : esc #{esc} : char #{char}"
+            debug_puts "get_char : esc #{esc} : char #{char}" if DEBUG
             case char
             when 27 # esc
               esc = 1
@@ -40,22 +51,22 @@ module Sonicri
           elsif esc == 2
             STDIN.flush
             esc = 0
-            @file.puts "esc 2 : char #{char}"
+            debug_puts "esc 2 : char #{char}" if DEBUG
             if char == 66
-              @file.puts "** next"
+              debug_puts "** next" if DEBUG
               return {action: "selection", value: "next"}
             elsif char == 67
-              @file.puts "** next_page"
+              debug_puts "** next_page" if DEBUG
               return {action: "selection", value: "next_page"}
             elsif char == 68
-              @file.puts "** prev_page"
+              debug_puts "** prev_page" if DEBUG
               return {action: "selection", value: "prev_page"}
             elsif char == 65
-              @file.puts "** prev"
+              debug_puts "** prev" if DEBUG
               return {action: "selection", value: "prev"}
             end
           elsif esc == 1
-            @file.puts "esc 1 : char #{char}"
+            debug_puts "esc 1 : char #{char}" if DEBUG
             if char == 91
               esc = 2
             else
@@ -64,13 +75,13 @@ module Sonicri
           end
         elsif esc == 1
           "ESC"
-          @file.puts "ESC"
-          @file.puts "esc 1 : char #{char}"
+          debug_puts "ESC" if DEBUG
+          debug_puts "esc 1 : char #{char}" if DEBUG
           return {action: "back", value: "no value"}
           STDIN.flush
           esc = 0
         end
-        sleep 0.01
+        sleep 0.005
       end
       return {action: "no action", value: "none"}
     end
