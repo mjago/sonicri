@@ -1,7 +1,7 @@
 module Sonicri
   enum UserState
     Init
-    Categories
+    Category
     MusicInit
     MusicSelect
     RadioInit
@@ -39,11 +39,11 @@ module Sonicri
   alias A = UserAction
 
   UserStates = [
-    {st: S::Init, res: A::Init, to: S::Categories},
-    {st: S::Categories, res: A::PodcastSelected, to: S::StationInit},
-    {st: S::Categories, res: A::MusicSelected, to: S::MusicInit},
-    {st: S::Categories, res: A::RadioSelected, to: S::RadioInit},
-    {st: S::Categories, res: A::Exit, to: S::Exit},
+    {st: S::Init, res: A::Init, to: S::Category},
+    {st: S::Category, res: A::PodcastSelected, to: S::StationInit},
+    {st: S::Category, res: A::MusicSelected, to: S::MusicInit},
+    {st: S::Category, res: A::RadioSelected, to: S::RadioInit},
+    {st: S::Category, res: A::Exit, to: S::Exit},
     {st: S::RadioInit, res: A::Init, to: S::RadioSelect},
     {st: S::RadioSelect, res: A::RadioSelected, to: S::Init},
     {st: S::RadioSelect, res: A::Back, to: S::Init},

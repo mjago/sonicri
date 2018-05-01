@@ -6,7 +6,7 @@ module Sonicri
       @states =
         {
           S::Init          => ->init_state,
-          S::Categories    => ->categories_state,
+          S::Category      => ->category_state,
           S::MusicInit     => ->music_init_state,
           S::MusicSelect   => ->music_select_state,
           S::RadioInit     => ->radio_init_state,
@@ -72,14 +72,21 @@ module Sonicri
       A::Init
     end
 
-    private def categories_state
-      case category_select
-      when :podcast_selected; A::PodcastSelected
-      when :music_selected  ; A::MusicSelected
-      when :radio_selected  ; A::RadioSelected
-      when :exit            ; A::Exit
-      else                    A::NoAction
+    private def category_state
+      if key = @ui.monitor("category")
+        case key.action
+        when "select" ; case key.value
+                        when "Podcasts" ; return A::PodcastSelected
+                        when "Music" ; return A::MusicSelected
+                        when "Radio Stations" ; return A::RadioSelected
+                        else
+                          raise "Error: Invalid category! (#{key.value.inspect})"
+                        end
+        when "back" ; return A::Exit
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def music_init_state
@@ -88,11 +95,17 @@ module Sonicri
     end
 
     private def music_select_state
-      case music_select
-      when :selected; A::MusicSelected
-      when :back    ; A::Back
-      else            A::NoAction
+      if key = @ui.monitor("music")
+        case key.action
+        when "select"
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_music key.value
+        when "back" ; return A::Back
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def radio_init_state
@@ -101,11 +114,17 @@ module Sonicri
     end
 
     private def radio_select_state
-      case radio_select
-      when :selected; A::RadioSelected
-      when :back    ; A::Back
-      else            A::NoAction
+      if key = @ui.monitor("radio")
+        case key.action
+        when "select"
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_radio key.value
+        when "back" ; return A::Back
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def station_init_state
@@ -121,12 +140,16 @@ module Sonicri
     end
 
     private def station_select_state
-      case station_select
-      when :selected; A::StationSelected
-      when :back    ; A::Back
-      else
-        A::NoAction
+      if key = @ui.monitor("station")
+        case key.action
+        when "select"
+          @show = key.value
+          return A::StationSelected
+        when "back" ; return A::Back
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def show_init_state
@@ -140,11 +163,16 @@ module Sonicri
     end
 
     private def show_select_state
-      case show_select
-      when :selected; A::ShowSelected
-      when :back    ; A::Back
-      else            A::NoAction
+      if key = @ui.monitor("show")
+        case key.action
+        when "select"
+          @xml_url = key.value
+          return A::ShowSelected
+        when "back" ; return A::Back
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def episode_init_state
@@ -156,18 +184,21 @@ module Sonicri
     end
 
     private def episode_select_state
-      case episode_select
-      when :selected
-        A::EpisodeSelected
-      when :back
-        A::Back
-      else
-        A::NoAction
+      if key = @ui.monitor("episode")
+        case key.action
+        when "select" ; return A::EpisodeSelected
+        when "back" ; return A::Back
+        when "char" ; monitor_playing key.value
+        end
       end
+      A::NoAction
     end
 
     private def episode_play_state
-      episode_play
+      @audio.stop if @audio.running?
+      await_audio_stop
+      url = @ui.episode_info[:url]
+      @audio.run filename = @ui.file_friendly_name, url
       A::Back
     end
 
@@ -180,129 +211,17 @@ module Sonicri
       sleep 0.1
     end
 
-    private def station_select
-      if key = @ui.monitor("station")
-        case key.action
-        when "select"
-          @show = key.value
-          return :selected
-        when "back"
-          return :back
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
-    private def category_select
-      if key = @ui.monitor("category")
-        case key.action
-        when "select"
-          case key.value
-          when "Podcasts"
-            return :podcast_selected
-          when "Music"
-            return :music_selected
-          when "Radio Stations"
-            return :radio_selected
-          else
-            raise "Error: Invalid category! (#{key.value.inspect})"
-          end
-        when "back"
-          return :exit
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
-    private def music_select
-      if key = @ui.monitor("music")
-        case key.action
-        when "select"
-          @audio.stop if @audio.running?
-          await_audio_stop
-          @audio.play_music key.value
-        when "back"
-          return :back
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
-    private def radio_select
-      if key = @ui.monitor("radio")
-        case key.action
-        when "select"
-          @audio.stop if @audio.running?
-          await_audio_stop
-          @audio.play_radio key.value
-        when "back"
-          return :back
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
-    private def show_select
-      if key = @ui.monitor("show")
-        case key.action
-        when "select"
-          @xml_url = key.value
-          return :selected
-        when "back"
-          return :back
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
-    private def episode_select
-      if key = @ui.monitor("episode")
-        case key.action
-        when "select"
-          return :selected
-        when "back"
-          return :back
-        when "char"
-          monitor_playing key.value
-        end
-      end
-      :no_action
-    end
-
     private def monitor_playing(value)
       if @audio.running?
         case value
-        when "f"
-          @audio.jump_forward(:small)
-        when "F"
-          @audio.jump_forward(:large)
-        when "b"
-          @audio.jump_back(:small)
-        when "B"
-          @audio.jump_back(:large)
-        when "p", "P"
-          @audio.pause
-        when "s", "S"
-          @audio.stop
+        when "f" ; @audio.jump_forward(:small)
+        when "F" ; @audio.jump_forward(:large)
+        when "b" ; @audio.jump_back(:small)
+        when "B" ; @audio.jump_back(:large)
+        when "p", "P" ; @audio.pause
+        when "s", "S" ; @audio.stop
         end
       end
-    end
-
-    private def episode_play
-      @audio.stop if @audio.running?
-      await_audio_stop
-      url = @ui.episode_info[:url]
-      @audio.run filename = @ui.file_friendly_name, url
     end
 
     private def await_audio_stop
