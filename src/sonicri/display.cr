@@ -75,16 +75,16 @@ module Sonicri
       draw_instruction
     end
 
-    def redraw(act)
-      case act[:action]
+    def redraw(key)
+      case key.action
       when "selection"
-        if act[:action] == "return"
+        if key.action == "return"
           close
         else
-          move_to(act[:value])
+          move_to(key.value)
         end
       when "selected"
-        select_item(act[:value])
+        select_item(key.value)
       end
       draw_list
     end

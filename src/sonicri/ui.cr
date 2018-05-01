@@ -79,143 +79,136 @@ module Sonicri
       {url: url, length: length}
     end
 
-    def category_monitor
+    def monitor(source)
       if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          save_display
-          @display.redraw(response)
-          category = @categories[@display.selected]
-          return {action: "select", value: category}
-        when "back"
-          return {action: "back", value: ""}
-        when "char"
-          return {action: "char", value: response[:value]}
-        end
-      end
-    end
-
-    def music_monitor
-      name = ""
-      if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          file = @music.albums[@display.selection]
-          if @music.directory? file
-            save_display
-            @music.push_level file
-            @display.list = @music.contents
-            @page.name = file
-            @display.page = @page
-            @display.draw_list
-            return {action: "no_action", value: ""}
-          elsif @music.mp3_file?(file)
-            filename = @music.file_with_path(file)
-            return {action: "select", value: filename}
-          else
-            raise "Error: Unexpected file in music_monitor!"
-          end
-        when "back"
-          if @music.top_level?
-            return {action: "back", value: ""}
-          else
-            @music.pop_level
-            resume
-            @display.list = @music.contents
-            return {action: "back", value: "internal"}
-          end
-        when "char"
-          return {action: "char", value: response[:value]}
-        end
-      end
-      return {action: "no_action", value: ""}
-    end
-
-    def radio_monitor
-      name = ""
-      if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          name = @radio.station_list[@display.selection]
-          url = @radio.url_of(name)
-          return {action: "select", value: url}
-        when "back"
-          return {action: "back", value: ""}
-        when "char"
-          return {action: "char", value: response[:value]}
-        end
-      end
-      return {action: "no_action", value: ""}
-    end
-
-    def stations_monitor
-      if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          save_display
-          @display.redraw(response)
-          @station = @list.stations[@display.selected]
-          return {action: "select", value: @station}
-        when "back"
-          return {action: "back", value: ""}
-        when "char"
-          return {action: "char", value: response[:value]}
-        end
-      end
-    end
-
-    def shows_monitor
-      if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          save_display
-          @display.redraw(response)
-          @title = @display.list[@display.selected]
-          xml_link = @list.xmlUrl(@title)[0]
-          return {action: "select", value: xml_link}
-        when "back"
-          return {action: "back", value: ""}
-        when "char"
-          return {action: "char", value: response[:value]}
-        end
-      end
-    end
-
-    def episodes_monitor
-      if @keys.key_available?
-        response = @keys.next_key
-        case response[:action]
-        when "selection"
-          @display.redraw(response)
-        when "selected"
-          @display.redraw(response)
-          @program = @display.list[@display.selected]
-          return {action: "select", value: @display.selected.to_s}
-        when "back"
-          return {action: "back", value: ""}
-        when "char"
-          return {action: "char", value: response[:value]}
+        key = @keys.next_key
+        case source
+        when "category"
+          category_monitor(key)
+        when "music"
+          music_monitor(key)
+        when "radio"
+          radio_monitor(key)
+        when "station"
+          station_monitor(key)
+        when "show"
+          show_monitor(key)
+        when "episode"
+          episode_monitor(key)
+        else
+          raise "Error! Unknown monitor in UI"
         end
       end
     end
 
     def file_friendly_name
       [@station, @title, @program].map { |n| sanitize_name n }.join("/")
+    end
+
+    private def station_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        save_display
+        @display.redraw(key)
+        @station = @list.stations[@display.selected]
+        return Key.new("select", @station)
+      else
+        return key
+      end
+    end
+
+    private def category_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        save_display
+        @display.redraw(key)
+        category = @categories[@display.selected]
+        return Key.new("select", category)
+      else
+        return key
+      end
+    end
+
+    private def music_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        file = @music.albums[@display.selection]
+        if @music.directory? file
+          save_display
+          @music.push_level file
+          @display.list = @music.contents
+          @page.name = file
+          @display.page = @page
+          @display.draw_list
+          return Key.new("no action")
+        elsif @music.mp3_file?(file)
+          filename = @music.file_with_path(file)
+          return Key.new("select", filename)
+        else
+          raise "Error: Unexpected file in music_monitor!"
+        end
+      when "back"
+        if @music.top_level?
+          return Key.new("back")
+        else
+          @music.pop_level
+          resume
+          @display.list = @music.contents
+          return Key.new("no action")
+        end
+      else
+        return key
+      end
+    end
+
+    private def radio_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        name = @radio.station_list[@display.selection]
+        if url = @radio.url_of(name)
+          return Key.new("select", url)
+        end
+      when "back"
+        return Key.new("back")
+      else
+        return key
+      end
+    end
+
+    private def show_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        save_display
+        @display.redraw(key)
+        @title = @display.list[@display.selected]
+        xml_link = @list.xmlUrl(@title)[0]
+        return Key.new("select", xml_link)
+      else
+        return key
+      end
+    end
+
+    private def episode_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        @display.redraw(key)
+        @program = @display.list[@display.selected]
+        return Key.new("select", @display.selected.to_s)
+      else
+        return key
+      end
     end
 
     private def save_display

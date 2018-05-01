@@ -181,25 +181,25 @@ module Sonicri
     end
 
     private def station_select
-      if res = @ui.stations_monitor
-        case res[:action]
+      if key = @ui.monitor("station")
+        case key.action
         when "select"
-          @show = res[:value]
+          @show = key.value
           return :selected
         when "back"
           return :back
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
     end
 
     private def category_select
-      if res = @ui.category_monitor
-        case res[:action]
+      if key = @ui.monitor("category")
+        case key.action
         when "select"
-          case res[:value]
+          case key.value
           when "Podcasts"
             return :podcast_selected
           when "Music"
@@ -207,73 +207,73 @@ module Sonicri
           when "Radio Stations"
             return :radio_selected
           else
-            raise "Error: Invalid category! (#{res[:value].inspect})"
+            raise "Error: Invalid category! (#{key.value.inspect})"
           end
         when "back"
           return :exit
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
     end
 
     private def music_select
-      if res = @ui.music_monitor
-        case res[:action]
+      if key = @ui.monitor("music")
+        case key.action
         when "select"
           @audio.stop if @audio.running?
           await_audio_stop
-          @audio.play_music res[:value]
+          @audio.play_music key.value
         when "back"
-          return :back unless res[:value] == "internal"
+          return :back
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
     end
 
     private def radio_select
-      if res = @ui.radio_monitor
-        case res[:action]
+      if key = @ui.monitor("radio")
+        case key.action
         when "select"
           @audio.stop if @audio.running?
           await_audio_stop
-          @audio.play_radio res[:value]
+          @audio.play_radio key.value
         when "back"
-          return :back unless res[:value] == "internal"
+          return :back
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
     end
 
     private def show_select
-      if res = @ui.shows_monitor
-        case res[:action]
+      if key = @ui.monitor("show")
+        case key.action
         when "select"
-          @xml_url = res[:value]
+          @xml_url = key.value
           return :selected
         when "back"
           return :back
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
     end
 
     private def episode_select
-      if res = @ui.episodes_monitor
-        case res[:action]
+      if key = @ui.monitor("episode")
+        case key.action
         when "select"
           return :selected
         when "back"
           return :back
         when "char"
-          monitor_playing res[:value]
+          monitor_playing key.value
         end
       end
       :no_action
