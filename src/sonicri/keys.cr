@@ -1,11 +1,9 @@
 require "file"
 
 module Sonicri
-
   record Key, action : String, value : String = "no value"
 
   class Keys
-
     @file : File | Nil
     DEBUG = false
 
@@ -41,7 +39,7 @@ module Sonicri
     end
 
     def key_available?
-      ! @key_stack.empty?
+      !@key_stack.empty?
     end
 
     def check_input
@@ -73,9 +71,9 @@ module Sonicri
             when 27 # esc
               esc = 1
             when 10
-              return Key.new("selected", "eval")
+              return Key.new("selected")
             when 81, 113 # 'q'
-              return Key.new("back", )
+              return Key.new("back")
             when 127 # 'DEL'
               return Key.new("back")
             else

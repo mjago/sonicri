@@ -75,15 +75,15 @@ module Sonicri
     private def category_state
       if key = @ui.monitor("category")
         case key.action
-        when "select" ; case key.value
-                        when "Podcasts" ; return A::PodcastSelected
-                        when "Music" ; return A::MusicSelected
-                        when "Radio Stations" ; return A::RadioSelected
-                        else
-                          raise "Error: Invalid category! (#{key.value.inspect})"
-                        end
-        when "back" ; return A::Exit
-        when "char" ; monitor_playing key.value
+        when "select"; case key.value
+        when "Podcasts"      ; return A::PodcastSelected
+        when "Music"         ; return A::MusicSelected
+        when "Radio Stations"; return A::RadioSelected
+        else
+          raise "Error: Invalid category! (#{key.value.inspect})"
+        end
+        when "back"; return A::Exit
+        when "char"; monitor_playing key.value
         end
       end
       A::NoAction
@@ -101,8 +101,8 @@ module Sonicri
           @audio.stop if @audio.running?
           await_audio_stop
           @audio.play_music key.value
-        when "back" ; return A::Back
-        when "char" ; monitor_playing key.value
+        when "back"; return A::Back
+        when "char"; monitor_playing key.value
         end
       end
       A::NoAction
@@ -120,8 +120,8 @@ module Sonicri
           @audio.stop if @audio.running?
           await_audio_stop
           @audio.play_radio key.value
-        when "back" ; return A::Back
-        when "char" ; monitor_playing key.value
+        when "back"; return A::Back
+        when "char"; monitor_playing key.value
         end
       end
       A::NoAction
@@ -145,8 +145,8 @@ module Sonicri
         when "select"
           @show = key.value
           return A::StationSelected
-        when "back" ; return A::Back
-        when "char" ; monitor_playing key.value
+        when "back"; return A::Back
+        when "char"; monitor_playing key.value
         end
       end
       A::NoAction
@@ -168,8 +168,8 @@ module Sonicri
         when "select"
           @xml_url = key.value
           return A::ShowSelected
-        when "back" ; return A::Back
-        when "char" ; monitor_playing key.value
+        when "back"; return A::Back
+        when "char"; monitor_playing key.value
         end
       end
       A::NoAction
@@ -186,9 +186,9 @@ module Sonicri
     private def episode_select_state
       if key = @ui.monitor("episode")
         case key.action
-        when "select" ; return A::EpisodeSelected
-        when "back" ; return A::Back
-        when "char" ; monitor_playing key.value
+        when "select"; return A::EpisodeSelected
+        when "back"  ; return A::Back
+        when "char"  ; monitor_playing key.value
         end
       end
       A::NoAction
@@ -214,12 +214,12 @@ module Sonicri
     private def monitor_playing(value)
       if @audio.running?
         case value
-        when "f" ; @audio.jump_forward(:small)
-        when "F" ; @audio.jump_forward(:large)
-        when "b" ; @audio.jump_back(:small)
-        when "B" ; @audio.jump_back(:large)
-        when "p", "P" ; @audio.pause
-        when "s", "S" ; @audio.stop
+        when "f"     ; @audio.jump_forward(:small)
+        when "F"     ; @audio.jump_forward(:large)
+        when "b"     ; @audio.jump_back(:small)
+        when "B"     ; @audio.jump_back(:large)
+        when "p", "P"; @audio.pause
+        when "s", "S"; @audio.stop
         end
       end
     end

@@ -14,7 +14,7 @@ module Sonicri
     HIT_SPACE = 29
 
     getter window
-    property list
+    getter list
     property page
 
     def initialize(@page : Page)
@@ -28,34 +28,13 @@ module Sonicri
       @list = [] of String
     end
 
+    def load_list(list)
+      @list = list
+    end
+
     def close
       NCurses.end_win
       exit 0
-    end
-
-    def draw_heading
-      @window.move(0, 0)
-      @window.with_color(HeadingColor) do
-        @window.print(" " * ((@page.line_size) + 6))
-        @window.move(0, (@page.line_size / 2) - 3)
-        @window.with_attr(:bold) do
-          @window.print("Sonicri")
-        end
-        @window.move(1, 0)
-        @window.refresh
-      end
-    end
-
-    def draw_title
-      @window.with_color(TitleColor) do
-        page_name = @page.name.size > 78 ? @page.name[0..74] + "...)" : @page.name
-        @window.with_attr(:bold) do
-          @window.print(" " * 6 + page_name)
-          @window.print(" " * (@page.line_size - page_name.size))
-        end
-        @window.print("\n")
-        @window.refresh
-      end
     end
 
     def draw_list
@@ -78,13 +57,9 @@ module Sonicri
     def redraw(key)
       case key.action
       when "selection"
-        if key.action == "return"
-          close
-        else
-          move_to(key.value)
-        end
+        move_to(key.value)
       when "selected"
-        select_item(key.value)
+        @page.select_item
       end
       draw_list
     end
@@ -98,6 +73,31 @@ module Sonicri
     end
 
     # private...
+
+    private def draw_heading
+      @window.move(0, 0)
+      @window.with_color(HeadingColor) do
+        @window.print(" " * ((@page.line_size) + 6))
+        @window.move(0, (@page.line_size / 2) - 3)
+        @window.with_attr(:bold) do
+          @window.print("Sonicri")
+        end
+        @window.move(1, 0)
+        @window.refresh
+      end
+    end
+
+    private def draw_title
+      @window.with_color(TitleColor) do
+        page_name = @page.name.size > 78 ? @page.name[0..74] + "...)" : @page.name
+        @window.with_attr(:bold) do
+          @window.print(" " * 6 + page_name)
+          @window.print(" " * (@page.line_size - page_name.size))
+        end
+        @window.print("\n")
+        @window.refresh
+      end
+    end
 
     private def draw_item_num(line_num)
       if line_num < @list.size
@@ -141,7 +141,7 @@ module Sonicri
         end
     end
 
-    def line_size(str)
+    private def line_size(str)
       # don't count combining accents
       str.delete("\u0300\u0301\u0302\u0308").size
     end
@@ -190,69 +190,14 @@ module Sonicri
 
     private def move_to(move)
       case move
-      when "next"      then move_to_next_item
-      when "prev"      then move_to_previous_item
-      when "next_page" then move_to_next_page
-      when "prev_page" then move_to_previous_page
-      when "return"    then close
+      when "next"      then @page.next_item(@list.size)
+      when "prev"      then @page.previous_item(@list.size)
+      when "next_page" then @page.next_page(@list.size)
+      when "prev_page" then @page.previous_page(@list.size)
       end
     end
 
-    private def select_item(value)
-      if value == "eval"
-        @page.selected = @page.selection
-      end
-    end
-
-    private def move_to_next_item
-      @page.selection += 1
-      if @page.selection > last_item
-        @page.selection = 0
-        @page.page_start = 0
-      elsif @page.selection > @page.page_start + @page.page_size - 1
-        @page.page_start += @page.page_size
-      end
-    end
-
-    private def move_to_previous_item
-      @page.selection -= 1
-      if @page.selection < 0
-        @page.selection = last_item
-        @page.page_start = start_of_last_page
-      elsif @page.selection < @page.page_start
-        @page.page_start -= @page.page_size
-      end
-    end
-
-    private def move_to_next_page
-      @page.page_start += @page.page_size
-      unless @page.page_start < @list.size
-        @page.page_start = 0
-        @page.selection %= @page.page_size
-      else
-        @page.selection += @page.page_size
-        @page.selection = last_item if (@page.selection > last_item)
-      end
-    end
-
-    private def move_to_previous_page
-      @page.page_start -= @page.page_size
-      if @page.page_start < 0
-        @page.page_start = start_of_last_page
-        @page.selection = start_of_last_page + (@page.selection %= @page.page_size)
-        @page.selection = last_item if (@page.selection > last_item)
-      else
-        @page.selection -= @page.page_size
-      end
-    end
-
-    private def start_of_last_page
-      (@list.size - 1)/@page.page_size * @page.page_size
-    end
-
-    private def last_item
-      @list.size - 1
-    end
+    # private
 
     private def format_item_num(count)
       num = (count + 1).to_s
@@ -297,10 +242,6 @@ module Sonicri
         raise("Error: Terminal hasn't any colors!")
         exit 1
       end
-    end
-
-    def program
-      true
     end
   end
 end
