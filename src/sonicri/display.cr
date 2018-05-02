@@ -49,9 +49,9 @@ module Sonicri
         else
           draw_blank_line(line_num, NonSelectColor)
         end
-        @window.refresh
       end
       draw_instruction
+      @window.refresh
     end
 
     def redraw(key)
@@ -83,7 +83,6 @@ module Sonicri
           @window.print("Sonicri")
         end
         @window.move(1, 0)
-        @window.refresh
       end
     end
 
@@ -95,7 +94,6 @@ module Sonicri
           @window.print(" " * (@page.line_size - page_name.size))
         end
         @window.print("\n")
-        @window.refresh
       end
     end
 
@@ -185,7 +183,6 @@ module Sonicri
       @window.print(" to quit, ")
       @window.with_color(InstructionColor) { @window.print(" H ") }
       @window.print(" for help...\n")
-      @window.refresh
     end
 
     private def move_to(move)
