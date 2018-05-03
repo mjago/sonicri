@@ -54,6 +54,23 @@ module Sonicri
       @window.refresh
     end
 
+    def draw_items
+      list_offset = 2
+      selection = @page.selection % @page.page_size
+      from = @page.descending? ? (@page.selection) - 1 : @page.selection
+      to = from + list_offset
+      @window.move((from % @page.page_size) + list_offset, 0)
+      (from...to).each do |line_num|
+        draw_item_num(line_num)
+        if line_num < @list.size
+          draw_line(line_num)
+        else
+          draw_blank_line(line_num, NonSelectColor)
+        end
+      end
+      @window.refresh
+    end
+
     def redraw(key)
       case key.action
       when "selection"
@@ -61,7 +78,8 @@ module Sonicri
       when "selected"
         @page.select_item
       end
-      draw_list
+      draw_items unless @page.redraw_page?
+      draw_list if @page.redraw_page?
     end
 
     def selected
