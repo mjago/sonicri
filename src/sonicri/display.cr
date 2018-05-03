@@ -56,12 +56,12 @@ module Sonicri
 
     def draw_items
       list_offset = 2
+      item_offset = 5
       selection = @page.selection % @page.page_size
       from = @page.descending? ? (@page.selection) - 1 : @page.selection
       to = from + list_offset
-      @window.move((from % @page.page_size) + list_offset, 0)
       (from...to).each do |line_num|
-        draw_item_num(line_num)
+        @window.move((line_num % @page.page_size) + list_offset, item_offset)
         if line_num < @list.size
           draw_line(line_num)
         else

@@ -1,6 +1,5 @@
 module Sonicri
   class Terminal
-
     # Attempt to resize, clear, move to top left of the terminal
 
     def self.setup
