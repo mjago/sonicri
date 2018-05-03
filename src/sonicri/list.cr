@@ -10,7 +10,7 @@ module Sonicri
     TwitOpmlAddr = "http://feeds.twit.tv/twitshows.opml"
     OPML_File    = "temp.xml"
 
-    getter parsed
+    getter parsed = false
 
     def initialize
       @data = [] of ListStruct
@@ -18,7 +18,6 @@ module Sonicri
       @results = {} of String => Array(String)
       @station = ""
       @twit = false
-      @parsed = false
     end
 
     def parse
@@ -68,32 +67,22 @@ module Sonicri
       temp
     end
 
-    def channel_url(station)
-      @data.each do |d|
-        temp << text if (d.station == station)
-      end
-      temp.uniq
-    end
-
     def outdated? # todo
       time = Sonicri::Time.new
       false
-      # true
     end
 
     def update
       # todo
     end
 
-    def update(addr)
+    # private
+
+    private def update(addr)
       Downloader.fetch(addr, TEMP_LIST)
       @document = XML.parse(TEMP_LIST)
       # check_for_errors
       FileUtils.cp(TEMP_LIST, OPML_File) # "program.rss")
-    end
-
-    def selected
-      @data[@selected_idx]
     end
 
     private def check_for_errors

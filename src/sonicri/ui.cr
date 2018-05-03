@@ -2,9 +2,9 @@ require "ncurses"
 
 module Sonicri
   class UI
-    setter list : List
-    getter display : Display
-    getter keys : Keys
+    setter list
+    getter display
+    getter keys
 
     def initialize
       @page = Page.new
@@ -31,35 +31,29 @@ module Sonicri
       when "categories"
         @page.name = "Categories"
         @display.page = @page
-        #       @display.list = @categories
         @display.load_list @categories
       when "music"
         @music = Music.new
         @page.name = "Music"
         @display.page = @page
-        #       @display.list = @music.albums
         @display.load_list @music.albums
       when "radio"
         @page.name = "Radio"
         @display.page = @page
-        #       @display.list = @radio.station_list
         @display.load_list @radio.station_list
       when "stations"
         @page.name = "Stations"
         @display.page = @page
-        #       @display.list = @list.stations
         @display.load_list @list.stations
       when "shows"
         @page.name = "Shows - " + "(#{@station})"
         @display.page = @page
-        #       @display.list = @list.shows(kind[:value])
         @display.load_list @list.shows(kind[:value])
       when "episodes"
         if @rss.parse kind[:value]
           list = @rss.results("title")
           @page.name = "Episodes - (" + @station + ": " + @title + ")"
           @display.page = @page
-          #         @display.list = @rss.results("title")
           @display.load_list @rss.results("title")
         else
           return false
@@ -67,13 +61,17 @@ module Sonicri
       else
         raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
       end
-      @display.draw_list
+      if kind["value"] == "init"
+        @display.draw_page
+      else
+        @display.draw_partial_page
+      end
       true
     end
 
     def resume
       @display = @display_stack.pop
-      @display.draw_list
+      @display.draw_partial_page
     end
 
     def episode_info
@@ -110,6 +108,8 @@ module Sonicri
     def file_friendly_name
       [@station, @title, @program].map { |n| sanitize_name n }.join("/")
     end
+
+    # private
 
     private def station_monitor(key)
       case key.action
@@ -151,7 +151,7 @@ module Sonicri
           @display.load_list @music.contents
           @page.name = file
           @display.page = @page
-          @display.draw_list
+          @display.draw_partial_page
           return Key.new("no action")
         elsif @music.mp3_file?(file)
           filename = @music.file_with_path(file)

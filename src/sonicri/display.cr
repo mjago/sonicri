@@ -37,8 +37,44 @@ module Sonicri
       exit 0
     end
 
-    def draw_list
+    def draw_partial_page
+      draw_list
+      @window.refresh
+    end
+
+    def draw_page
       draw_heading
+      draw_list
+      draw_instruction
+      @window.refresh
+    end
+
+    def redraw(key)
+      case key.action
+      when "selection"
+        move_to(key.value)
+      when "selected"
+        @page.select_item
+      end
+      draw_items unless @page.redraw_page?
+      draw_list if @page.redraw_page?
+      @window.refresh
+    end
+
+    def selected
+      @page.selected
+    end
+
+    def selection
+      @page.selection
+    end
+
+    # private...
+
+    private def draw_list
+      title_offset_row = 1
+      title_offset_col = 0
+      @window.move(title_offset_row, title_offset_col)
       draw_title
       from = @page.page_start
       to = from + @page.page_size
@@ -50,11 +86,9 @@ module Sonicri
           draw_blank_line(line_num, NonSelectColor)
         end
       end
-      draw_instruction
-      @window.refresh
     end
 
-    def draw_items
+    private def draw_items
       list_offset = 2
       item_offset = 5
       selection = @page.selection % @page.page_size
@@ -68,29 +102,7 @@ module Sonicri
           draw_blank_line(line_num, NonSelectColor)
         end
       end
-      @window.refresh
     end
-
-    def redraw(key)
-      case key.action
-      when "selection"
-        move_to(key.value)
-      when "selected"
-        @page.select_item
-      end
-      draw_items unless @page.redraw_page?
-      draw_list if @page.redraw_page?
-    end
-
-    def selected
-      @page.selected
-    end
-
-    def selection
-      @page.selection
-    end
-
-    # private...
 
     private def draw_heading
       @window.move(0, 0)

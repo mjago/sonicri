@@ -1,6 +1,7 @@
 module Sonicri
   enum UserState
     Init
+    CategoryInit
     Category
     MusicInit
     MusicSelect
@@ -39,21 +40,22 @@ module Sonicri
   alias A = UserAction
 
   UserStates = [
-    {st: S::Init, res: A::Init, to: S::Category},
+    {st: S::Init, res: A::Init, to: S::CategoryInit},
+    {st: S::CategoryInit, res: A::Init, to: S::Category},
     {st: S::Category, res: A::PodcastSelected, to: S::StationInit},
     {st: S::Category, res: A::MusicSelected, to: S::MusicInit},
     {st: S::Category, res: A::RadioSelected, to: S::RadioInit},
     {st: S::Category, res: A::Exit, to: S::Exit},
     {st: S::RadioInit, res: A::Init, to: S::RadioSelect},
     {st: S::RadioSelect, res: A::RadioSelected, to: S::Init},
-    {st: S::RadioSelect, res: A::Back, to: S::Init},
+    {st: S::RadioSelect, res: A::Back, to: S::CategoryInit},
     {st: S::StationInit, res: A::Init, to: S::StationSelect},
     {st: S::MusicInit, res: A::Init, to: S::MusicSelect},
     {st: S::MusicSelect, res: A::MusicSelected, to: S::Exit},
-    {st: S::MusicSelect, res: A::Back, to: S::Init},
+    {st: S::MusicSelect, res: A::Back, to: S::CategoryInit},
     {st: S::StationResume, res: A::StationResumed, to: S::StationSelect},
     {st: S::StationSelect, res: A::StationSelected, to: S::ShowInit},
-    {st: S::StationSelect, res: A::Back, to: S::Init},
+    {st: S::StationSelect, res: A::Back, to: S::CategoryInit},
     {st: S::ShowInit, res: A::Init, to: S::ShowSelect},
     {st: S::ShowResume, res: A::ShowResumed, to: S::ShowSelect},
     {st: S::ShowSelect, res: A::ShowSelected, to: S::EpisodeInit},

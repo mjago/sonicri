@@ -1,13 +1,9 @@
 module Sonicri
   struct ListStruct
-    property station, text, description, url
-
-    def initialize
-      @station = ""
-      @text = ""
-      @description = ""
-      @url = ""
-    end
+    property station = ""
+    property text = ""
+    property description = ""
+    property url = ""
 
     def self.names
       %w[@text @description @url]

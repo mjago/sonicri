@@ -36,7 +36,6 @@ module Sonicri
 
     def stop
       quit
-      @dl.quit
       sleep 0.2
       initialize
       @running = false
@@ -47,6 +46,7 @@ module Sonicri
       @dl.quit
       @quit = true
       @q.clear
+      clear_progress
     end
 
     def running?
@@ -213,14 +213,6 @@ module Sonicri
       ::Time.now.epoch
     end
 
-    private def display_buffering
-      display("Buffering...              ")
-    end
-
-    private def display_playing
-      display("Playing (streaming)...    ")
-    end
-
     private def fiber_update_display
       spawn do
         while !@quit
@@ -238,12 +230,22 @@ module Sonicri
           sec = offset / rate
           if @source == :file && rate > 0
             @file_size = @sample_length / rate
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}          ")
+            win.print(" time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}         ")
           else
-            win.print("time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{rate} ")
+            win.print(" time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{rate}")
           end
           win.refresh
         end
+      else
+        raise "Error: no Window!"
+      end
+    end
+
+    private def clear_progress
+      if (win = @win)
+        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
+        win.print("                             ")
+        win.refresh
       else
         raise "Error: no Window!"
       end

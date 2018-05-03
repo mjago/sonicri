@@ -6,6 +6,7 @@ module Sonicri
       @states =
         {
           S::Init          => ->init_state,
+          S::CategoryInit  => ->category_init_state,
           S::Category      => ->category_state,
           S::MusicInit     => ->music_init_state,
           S::MusicSelect   => ->music_select_state,
@@ -66,6 +67,13 @@ module Sonicri
     # states
 
     private def init_state
+      @ui.list = @list
+      @list.update if @list.outdated?
+      @ui.init_list({type: "categories", value: "init"})
+      A::Init
+    end
+
+    private def category_init_state
       @ui.list = @list
       @list.update if @list.outdated?
       @ui.init_list({type: "categories", value: ""})

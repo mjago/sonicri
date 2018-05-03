@@ -4,12 +4,10 @@ module Sonicri
   MUSIC_ROOT = File.expand_path(File.read("./music_root.rc").strip)
 
   class Music
-    getter :albums
-    setter :path
+    getter albums = [] of String
+    setter path = [] of String
 
     def initialize
-      @albums = [] of String
-      @path = [] of String
       parse_music_files(".")
     end
 
