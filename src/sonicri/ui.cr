@@ -10,7 +10,7 @@ module Sonicri
       @page = Page.new
       @list = List.new
       @display = Display.new(@page)
-      @keys = Keys.new(@display.window)
+      @keys = Keys.new(@display.progress_win)
       @categories = ["Podcasts", "Music", "Radio Stations"]
       @station = ""
       @title = ""
@@ -99,6 +99,8 @@ module Sonicri
           show_monitor(key)
         when "episode"
           episode_monitor(key)
+        when "help"
+          help_monitor(key)
         else
           raise "Error! Unknown monitor in UI"
         end
@@ -213,6 +215,16 @@ module Sonicri
         @program = @display.list[@display.selected]
         return Key.new("select", @display.selected.to_s)
       else
+        return key
+      end
+    end
+
+    def display_help
+      @display.draw_help
+    end
+
+    private def help_monitor(key)
+      if key.action
         return key
       end
     end

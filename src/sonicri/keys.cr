@@ -77,7 +77,11 @@ module Sonicri
             when 127 # 'DEL'
               return Key.new("back")
             else
-              return Key.new("char", char.chr.to_s)
+              if char.chr.to_s.downcase == "h"
+                return Key.new("help")
+              else
+                return Key.new("char", char.chr.to_s)
+              end
             end
           elsif esc == 2
             STDIN.flush

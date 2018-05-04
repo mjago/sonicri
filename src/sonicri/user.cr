@@ -22,6 +22,8 @@ module Sonicri
           S::EpisodeSelect => ->episode_select_state,
           S::EpisodePlay   => ->episode_play_state,
           S::Exit          => ->exit_state,
+          S::HelpInit      => ->help_init_state,
+          S::Help          => ->help_state,
         }
 
       @state = State.new UserStates
@@ -29,8 +31,9 @@ module Sonicri
       @show = ""
       @xml_url = ""
       @ui = UI.new
-      @audio = Audio.new
-      @audio.win = @ui.display.window
+      @audio = Audio.new(@ui.display.progress)
+      #     @audio.win = @ui.display.progress_win
+      @previous_state = S::Init
     end
 
     def run
@@ -83,15 +86,17 @@ module Sonicri
     private def category_state
       if key = @ui.monitor("category")
         case key.action
-        when "select"; case key.value
-        when "Podcasts"      ; return A::PodcastSelected
-        when "Music"         ; return A::MusicSelected
-        when "Radio Stations"; return A::RadioSelected
-        else
-          raise "Error: Invalid category! (#{key.value.inspect})"
-        end
+        when "select"
+          case key.value
+          when "Podcasts"      ; return A::PodcastSelected
+          when "Music"         ; return A::MusicSelected
+          when "Radio Stations"; return A::RadioSelected
+          else
+            raise "Error: Invalid category! (#{key.value.inspect})"
+          end
         when "back"; return A::Exit
         when "char"; monitor_playing key.value
+        when "help"; return A::Help
         end
       end
       A::NoAction
@@ -213,6 +218,18 @@ module Sonicri
     private def exit_state
       do_exit
       A::Exit
+    end
+
+    private def help_init_state
+      @ui.display_help
+      A::Init
+    end
+
+    private def help_state
+      if key = @ui.monitor("help")
+        return A::Back
+      end
+      A::NoAction
     end
 
     private def do_events

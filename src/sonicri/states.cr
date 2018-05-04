@@ -17,6 +17,8 @@ module Sonicri
     EpisodeSelect
     EpisodePlay
     Exit
+    HelpInit
+    Help
   end
 
   enum UserAction
@@ -34,6 +36,7 @@ module Sonicri
     EpisodeInit
     EpisodeInitCancelled
     EpisodeSelected
+    Help
   end
 
   alias S = UserState
@@ -45,6 +48,7 @@ module Sonicri
     {st: S::Category, res: A::PodcastSelected, to: S::StationInit},
     {st: S::Category, res: A::MusicSelected, to: S::MusicInit},
     {st: S::Category, res: A::RadioSelected, to: S::RadioInit},
+    {st: S::Category, res: A::Help, to: S::HelpInit},
     {st: S::Category, res: A::Exit, to: S::Exit},
     {st: S::RadioInit, res: A::Init, to: S::RadioSelect},
     {st: S::RadioSelect, res: A::RadioSelected, to: S::Init},
@@ -66,5 +70,7 @@ module Sonicri
     {st: S::EpisodeSelect, res: A::Back, to: S::ShowResume},
     {st: S::EpisodePlay, res: A::Back, to: S::EpisodeSelect},
     {st: S::Exit, res: A::Exit, to: S::Exit},
+    {st: S::HelpInit, res: A::Init, to: S::Help},
+    {st: S::Help, res: A::Back, to: S::Init},
   ]
 end
