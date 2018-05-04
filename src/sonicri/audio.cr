@@ -7,17 +7,18 @@ require "time"
 module Sonicri
   class Audio
     setter win : NCurses::Window | Nil
-
+    property progress : Display::Progress
     include Libao
     include Libmpg123
 
     BUF_SIZE     = 4800
-    INFO_POS_ROW =   23
+    INFO_POS_ROW =    0
     INFO_POS_COL =    0
 
-    def initialize
+    def initialize(@progress)
       @source = :feed
-      @done = @rate = 0_i64
+      @done = 0_i64
+      @rate = 0_i64
       @channels = @bits = 0
       @running = @quit = false
       @ao = Ao.new
@@ -34,10 +35,23 @@ module Sonicri
       @q = Deque(UInt8).new(BUF_SIZE)
     end
 
+    def reinitialize
+      @source = :feed
+      @channels = @bits = 0
+      @running = @quit = false
+      @dl = Downloader.new
+      @ch_play = Channel(Nil).new
+      @auxslice = Bytes.new(BUF_SIZE)
+      @cache_name = ""
+      @file_size = 0_i64
+      @sample_length = 0_i64
+      @q.clear
+    end
+
     def stop
       quit
       sleep 0.2
-      initialize
+      reinitialize
       @running = false
     end
 
@@ -171,7 +185,8 @@ module Sonicri
     end
 
     private def set_audio_format
-      @rate = @done = 0_i64
+      @rate = 0_i64
+      @done = 0_i64
       @channels = encoding = 0
       @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
       @bits = @mpg.encsize(encoding) * 8
@@ -217,38 +232,29 @@ module Sonicri
       spawn do
         while !@quit
           display_progress
-          sleep 0.1
+          sleep 0.9
         end
       end
     end
 
     private def display_progress
-      if (win = @win) && (rate = @rate)
-        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-        if rate > 0
+      if @running
+        if @rate > 0_i64
           offset = @mpg.sample_offset
-          sec = offset / rate
-          if @source == :file && rate > 0
-            @file_size = @sample_length / rate
-            win.print(" time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}         ")
+          sec = offset / @rate
+          if @source == :file
+            @file_size = @sample_length / @rate
+            @progress.print(" Time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}         ")
           else
-            win.print(" time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{rate}")
+            @progress.print(" Time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
           end
-          win.refresh
         end
       else
-        raise "Error: no Window!"
       end
     end
 
     private def clear_progress
-      if (win = @win)
-        win.not_nil!.move(INFO_POS_ROW, INFO_POS_COL)
-        win.print("                             ")
-        win.refresh
-      else
-        raise "Error: no Window!"
-      end
+      @progress.clear
     end
 
     private def fiber_monitor_download
@@ -301,6 +307,7 @@ module Sonicri
           end
           size1 = size
           result = decode(inp: data, insize: size, outsize: BUF_SIZE)
+          Fiber.yield
           process_result(result)
           sleep 0.01 if size1 == 0_i64
         end
