@@ -32,7 +32,6 @@ module Sonicri
       @xml_url = ""
       @ui = UI.new
       @audio = Audio.new(@ui.display.progress)
-      #     @audio.win = @ui.display.progress_win
       @previous_state = S::Init
     end
 

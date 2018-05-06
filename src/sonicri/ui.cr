@@ -10,7 +10,7 @@ module Sonicri
       @page = Page.new
       @list = List.new
       @display = Display.new(@page)
-      @keys = Keys.new(@display.progress_win)
+      @keys = Keys.new(@display.list_win)
       @categories = ["Podcasts", "Music", "Radio Stations"]
       @station = ""
       @title = ""

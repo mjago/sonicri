@@ -5,13 +5,18 @@ module Sonicri
 
   class Keys
     @file : File | Nil
+    @new_mask : UInt64
     DEBUG = false
 
     def initialize(@win : NCurses::Window)
+      @new_mask = LibNCurses::MouseMask::ALL_MOUSE_EVENTS.value.to_u64 |
+                  LibNCurses::MouseMask::REPORT_MOUSE_POSITION.value.to_u64
+      @old_mask = 0_u64
       @key_stack = Deque(Key).new
       monitor_keyboard
       @file = File.open("check_keys.org", "w") if DEBUG
       debug_puts "* check_file" if DEBUG
+      NCurses.mouse_mask(@new_mask, pointerof(@old_mask))
     end
 
     private def monitor_keyboard
@@ -76,6 +81,21 @@ module Sonicri
               return Key.new("back")
             when 127 # 'DEL'
               return Key.new("back")
+            when 96
+              return Key.new("selection", "prev")
+            when 97
+              return Key.new("selection", "next")
+            when 32
+              col = win.get_char
+              row = win.get_char
+              if row.is_a?(Int32) && col.is_a?(Int32)
+                if (col >= 38) && (col < 38 + 81)
+                  if (row >= 35) && (row < 35 + 20)
+                    row -= 35
+                    return Key.new("mouse_selected", row.to_s)
+                  end
+                end
+              end
             else
               if char.chr.to_s.downcase == "h"
                 return Key.new("help")

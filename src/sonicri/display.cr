@@ -15,7 +15,7 @@ module Sonicri
     HIT_SPACE         =  0
 
     property progress : Progress
-    property progress_win
+    property list_win
     getter list
     property page
 
