@@ -113,20 +113,6 @@ module Sonicri
 
     # private
 
-    private def station_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "selected"
-        save_display
-        @display.redraw(key)
-        @station = @list.stations[@display.selected]
-        return Key.new("select", @station)
-      else
-        return key
-      end
-    end
-
     private def category_monitor(key)
       case key.action
       when "selection"
@@ -136,9 +122,78 @@ module Sonicri
         @display.redraw(key)
         category = @categories[@display.selected]
         return Key.new("select", category)
+      when "mouse_selected"
+        if @display.select_maybe(key)
+          save_display
+          category = @categories[@display.selected]
+          return Key.new("select", category)
+        end
       else
         return key
       end
+    end
+
+    private def station_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        save_display
+        @display.redraw(key)
+        @station = @list.stations[@display.selected]
+        return Key.new("select", @station)
+      when "mouse_selected"
+        if @display.select_maybe(key)
+          save_display
+          @station = @list.stations[@display.selected]
+          return Key.new("select", @station)
+        end
+      else
+        return key
+      end
+    end
+
+    private def show_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        save_display
+        @display.redraw(key)
+        return show_select
+      when "mouse_selected"
+        if @display.select_maybe(key)
+          save_display
+          return show_select
+        end
+      else
+        return key
+      end
+    end
+
+    private def show_select
+      @title = @display.list[@display.selected]
+      xml_link = @list.xmlUrl(@title)[0]
+      return Key.new("select", xml_link)
+    end
+
+    private def episode_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "selected"
+        @display.redraw(key)
+        return episode_select
+      when "mouse_selected"
+        return episode_select if @display.select_maybe(key)
+      else
+        return key
+      end
+    end
+
+    private def episode_select
+      @program = @display.list[@display.selected]
+      return Key.new("select", @display.selected.to_s)
     end
 
     private def music_monitor(key)
@@ -146,21 +201,9 @@ module Sonicri
       when "selection"
         @display.redraw(key)
       when "selected"
-        file = @music.albums[@display.selection]
-        if @music.directory? file
-          save_display
-          @music.push_level file
-          @display.load_list @music.contents
-          @page.name = file
-          @display.page = @page
-          @display.draw_partial_page
-          return Key.new("no action")
-        elsif @music.mp3_file?(file)
-          filename = @music.file_with_path(file)
-          return Key.new("select", filename)
-        else
-          raise "Error: Unexpected file in music_monitor!"
-        end
+        return music_select
+      when "mouse_selected"
+        return music_select if @display.select_maybe(key)
       when "back"
         if @music.top_level?
           return Key.new("back")
@@ -175,15 +218,32 @@ module Sonicri
       end
     end
 
+    private def music_select
+      file = @music.albums[@display.selection]
+      if @music.directory? file
+        save_display
+        @music.push_level file
+        @display.load_list @music.contents
+        @page.name = file
+        @display.page = @page
+        @display.draw_partial_page
+        return Key.new("no action")
+      elsif @music.mp3_file?(file)
+        filename = @music.file_with_path(file)
+        return Key.new("select", filename)
+      else
+        raise "Error: Unexpected file in UI#music_select!"
+      end
+    end
+
     private def radio_monitor(key)
       case key.action
       when "selection"
         @display.redraw(key)
       when "selected"
-        name = @radio.station_list[@display.selection]
-        if url = @radio.url_of(name)
-          return Key.new("select", url)
-        end
+        return radio_select
+      when "mouse_selected"
+        return radio_select if @display.select_maybe(key)
       when "back"
         return Key.new("back")
       else
@@ -191,31 +251,10 @@ module Sonicri
       end
     end
 
-    private def show_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "selected"
-        save_display
-        @display.redraw(key)
-        @title = @display.list[@display.selected]
-        xml_link = @list.xmlUrl(@title)[0]
-        return Key.new("select", xml_link)
-      else
-        return key
-      end
-    end
-
-    private def episode_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "selected"
-        @display.redraw(key)
-        @program = @display.list[@display.selected]
-        return Key.new("select", @display.selected.to_s)
-      else
-        return key
+    private def radio_select
+      name = @radio.station_list[@display.selection]
+      if url = @radio.url_of(name)
+        return Key.new("select", url)
       end
     end
 

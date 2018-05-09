@@ -143,6 +143,13 @@ module Sonicri
       @list_win.refresh
     end
 
+    def select_maybe(key)
+      if @page.select_maybe(key, @list.size)
+        draw_list
+        return true
+      end
+    end
+
     def selected
       @page.selected
     end

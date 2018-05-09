@@ -9,6 +9,15 @@ module Sonicri
     property? descending = true
     property? redraw_page = true
 
+    def select_maybe(key, list_size)
+      val = key.value.to_i + page_start
+      return false if val >= list_size
+      @selection = val
+      @selected = val
+      @redraw_page = true
+      true
+    end
+
     def next_item(list_size)
       @redraw_page = false
       @descending = true

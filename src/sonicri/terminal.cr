@@ -1,12 +1,13 @@
 module Sonicri
   class Terminal
-    # Attempt to resize, clear, move to top left of the terminal
+    # Attempt to resize, clear, set title, move to top left of the terminal
+    COMMANDS = {resize:         "printf \e[8;26;88t",
+                title:          "echo -ne \"\033]0;Sonicri Audio Player\007\"",
+                to_left_corner: "printf \033[H",
+                clear_screen:   "printf \033[2J"}
 
     def self.setup
-      STDOUT.puts "printf \e[8;26;88t"
-      STDOUT.puts "printf \033[?1003h"
-      STDOUT.puts "printf \033[H"
-      STDOUT.puts "printf \033[2J"
+      COMMANDS.each_value { |x| STDOUT.puts x }
     end
   end
 end

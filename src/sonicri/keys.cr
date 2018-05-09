@@ -4,9 +4,21 @@ module Sonicri
   record Key, action : String, value : String = "no value"
 
   class Keys
+    LETTER_q              =  81
+    LETTER_Q              = 113
+    BACKSPACE             = 127
+    SCROLL_WHEEL_FORWARD  =  96
+    SCROLL_WHEEL_BACKWARD =  97
+    SCROLL_WHEEL_SWITCH   =  33
+    MOUSE_KEY_LEFT        =  32
+    MOUSE_KEY_RIGHT       =  34
+    KEY_UP                =  65
+    KEY_DOWN              =  66
+    KEY_RIGHT             =  67
+    KEY_LEFT              =  68
+    DEBUG                 = false
     @file : File | Nil
     @new_mask : UInt64
-    DEBUG = false
 
     def initialize(@win : NCurses::Window)
       @new_mask = LibNCurses::MouseMask::ALL_MOUSE_EVENTS.value.to_u64 |
@@ -77,26 +89,33 @@ module Sonicri
               esc = 1
             when 10
               return Key.new("selected")
-            when 81, 113 # 'q'
+            when LETTER_q, LETTER_Q
+              return Key.new("quit")
+            when BACKSPACE
               return Key.new("back")
-            when 127 # 'DEL'
-              return Key.new("back")
-            when 96
-              return Key.new("selection", "prev")
-            when 97
-              return Key.new("selection", "next")
-            when 32
-              col = win.get_char
-              row = win.get_char
-              if row.is_a?(Int32) && col.is_a?(Int32)
-                if (col >= 38) && (col < 38 + 81)
-                  if (row >= 35) && (row < 35 + 20)
-                    row -= 35
-                    return Key.new("mouse_selected", row.to_s)
-                  end
-                end
+            when SCROLL_WHEEL_FORWARD
+              debug_puts "scroll wheel forward"
+              return Key.new("selection", "next_page")
+            when SCROLL_WHEEL_BACKWARD
+              debug_puts "scroll wheel backward"
+              return Key.new("selection", "prev_page")
+            when SCROLL_WHEEL_SWITCH
+              return Key.new("no action")
+            when MOUSE_KEY_RIGHT
+              if get_position(win)
+                debug_puts "mouse key right"
+                return Key.new("back")
+              end
+            when MOUSE_KEY_LEFT
+              if x = get_position(win)
+                debug_puts "pos #{x}"
+                col = x.first
+                row = x.last
+                debug_puts "mouse key left"
+                return Key.new("mouse_selected", row.to_s)
               end
             else
+              # debug_puts "key #{char}"
               if char.chr.to_s.downcase == "h"
                 return Key.new("help")
               else
@@ -107,16 +126,16 @@ module Sonicri
             STDIN.flush
             esc = 0
             debug_puts "esc 2 : char #{char}" if DEBUG
-            if char == 66
+            if char == KEY_DOWN
               debug_puts "** next" if DEBUG
               return Key.new("selection", "next")
-            elsif char == 67
+            elsif char == KEY_RIGHT
               debug_puts "** next_page" if DEBUG
               return Key.new("selection", "next_page")
-            elsif char == 68
+            elsif char == KEY_LEFT
               debug_puts "** prev_page" if DEBUG
               return Key.new("selection", "prev_page")
-            elsif char == 65
+            elsif char == KEY_UP
               debug_puts "** prev" if DEBUG
               return Key.new("selection", "prev")
             end
@@ -129,7 +148,6 @@ module Sonicri
             end
           end
         elsif esc == 1
-          "ESC"
           debug_puts "ESC" if DEBUG
           debug_puts "esc 1 : char #{char}" if DEBUG
           return Key.new("back")
@@ -139,6 +157,21 @@ module Sonicri
         sleep 0.005
       end
       return Key.new("no action")
+    end
+
+    # private
+
+    private def get_position(win)
+      col = win.get_char
+      row = win.get_char
+      if row.is_a?(Int32) && col.is_a?(Int32)
+        if (col >= 38) && (col < 38 + 81)
+          if (row >= 35) && (row < 35 + 20)
+            row -= 35
+            return col, row
+          end
+        end
+      end
     end
   end
 end
