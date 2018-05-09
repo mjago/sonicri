@@ -81,6 +81,7 @@ module Sonicri
     end
 
     def play_radio(url)
+      display_initializing
       redir = @dl.follow_redirects(url.not_nil!)
       @mpg.open_feed
       @dl.mode = :radio
@@ -92,6 +93,7 @@ module Sonicri
 
     def play_music(file)
       if file
+        display_initializing
         @mpg.open(file)
         @mpg.param(:flags, :quiet, 0.0)
         @sample_length = @mpg.length
@@ -104,6 +106,7 @@ module Sonicri
     end
 
     def run(name, addr)
+      display_initializing
       @cache_name = make_cache_name(name)
       if File.exists? @cache_name
         move_to_file_cache(start = true)
@@ -238,19 +241,44 @@ module Sonicri
     end
 
     private def display_progress
-      if @running
-        if @rate > 0_i64
-          offset = @mpg.sample_offset
-          sec = offset / @rate
-          if @source == :file
-            @file_size = @sample_length / @rate
-            @progress.print(" Time: #{sec/60}:#{"%02d" % (sec % 60)}/#{@file_size/60}:#{"%02d" % (@file_size % 60)}         ")
-          else
-            @progress.print(" Time: #{sec/60}:#{"%02d" % (sec % 60)}, rate: #{@rate}")
-          end
+      if @running && @rate > 0_i64
+        if @source == :file
+          print_time_progressed
+        else
+          print_time_and_rate
         end
-      else
       end
+    end
+
+    private def print_time_progressed
+      @file_size = @sample_length / @rate
+      @progress.print("#{time_str}/#{size_str}")
+    end
+
+    private def print_time_and_rate
+      @progress.print("#{time_str}, #{rate_str}")
+    end
+
+    private def time_str
+      sec = seconds
+      "Time: #{sec/60}:#{"%02d" % (sec % 60)}"
+    end
+
+    private def rate_str
+      "Rate: #{@rate}"
+    end
+
+    private def size_str
+      "#{@file_size/60}:#{"%02d" % (@file_size % 60)}"
+    end
+
+    private def seconds
+      offset = @mpg.sample_offset
+      offset / @rate
+    end
+
+    private def display_initializing
+      @progress.print("Initializing...")
     end
 
     private def clear_progress

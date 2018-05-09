@@ -27,7 +27,7 @@ module Sonicri
       def print(progress : String = "")
         @win.move(1, 0)
         @win.with_color(ProgressColor) do
-          @win.print progress + (" " * (31 - progress.size))
+          @win.print " " + progress + (" " * (30 - progress.size))
         end
         @win.refresh
       end
