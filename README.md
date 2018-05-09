@@ -20,16 +20,20 @@ Requires:
 Customise *local music root directory* by editing *music_root.rc*
 
 ## Usage
-
- - *Arrow keys* to navigate menus
- - *RETURN* to play or *enter selection menu*
- - *p* to pause
- - *f* to skip-forward (10 sec)
- - *F* to skip-forward (1 minute)
- - *b* to skip-backward (10 sec)
- - *B* to skip-backward (1 minute)
- - *s* to stop
- - *BACKSPACE or ESCAPE or q* to *climb back up menu* / quit
+### You may use keys or mouse to navigate and select
+ - **Arrow keys** to navigate menus
+ - **RETURN** to select
+ - **BACKSPACE or ESCAPE** to *climb back up menu*
+ - **Left Mouse Button** to select
+ - **Right Mouse Button** to climb back up menu
+ - **Scroll wheel** to display next or previous pages
+ - **p** to pause / resume
+ - **f** to skip-forward (10 sec)
+ - **F** to skip-forward (1 minute)
+ - **b** to skip-backward (10 sec)
+ - **B** to skip-backward (1 minute)
+ - **s** to stop
+ - **q** to quit
 
 ## Contributors
 
