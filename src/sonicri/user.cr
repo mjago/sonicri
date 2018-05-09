@@ -206,7 +206,7 @@ module Sonicri
         when "select"; return A::EpisodeSelected
         when "back"  ; return A::Back
         when "char"  ; monitor_playing key.value
-        when "quit"; return A::Exit
+        when "quit"  ; return A::Exit
         end
       end
       A::NoAction
