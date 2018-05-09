@@ -135,7 +135,7 @@ module Sonicri
       case key.action
       when "selection"
         move_to(key.value)
-      when "selected"
+      when "key selected"
         @page.select_item
       end
       draw_items unless @page.redraw_page?

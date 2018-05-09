@@ -117,12 +117,12 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         save_display
         @display.redraw(key)
         category = @categories[@display.selected]
         return Key.new("select", category)
-      when "mouse_selected"
+      when "mouse selected"
         if @display.select_maybe(key)
           save_display
           category = @categories[@display.selected]
@@ -137,12 +137,12 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         save_display
         @display.redraw(key)
         @station = @list.stations[@display.selected]
         return Key.new("select", @station)
-      when "mouse_selected"
+      when "mouse selected"
         if @display.select_maybe(key)
           save_display
           @station = @list.stations[@display.selected]
@@ -157,11 +157,11 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         save_display
         @display.redraw(key)
         return show_select
-      when "mouse_selected"
+      when "mouse selected"
         if @display.select_maybe(key)
           save_display
           return show_select
@@ -181,10 +181,10 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         @display.redraw(key)
         return episode_select
-      when "mouse_selected"
+      when "mouse selected"
         return episode_select if @display.select_maybe(key)
       else
         return key
@@ -200,9 +200,9 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         return music_select
-      when "mouse_selected"
+      when "mouse selected"
         return music_select if @display.select_maybe(key)
       when "back"
         if @music.top_level?
@@ -240,9 +240,9 @@ module Sonicri
       case key.action
       when "selection"
         @display.redraw(key)
-      when "selected"
+      when "key selected"
         return radio_select
-      when "mouse_selected"
+      when "mouse selected"
         return radio_select if @display.select_maybe(key)
       when "back"
         return Key.new("back")

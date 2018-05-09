@@ -88,7 +88,7 @@ module Sonicri
             when 27 # esc
               esc = 1
             when 10
-              return Key.new("selected")
+              return Key.new("key selected")
             when LETTER_q, LETTER_Q
               return Key.new("quit")
             when BACKSPACE
@@ -112,7 +112,7 @@ module Sonicri
                 col = x.first
                 row = x.last
                 debug_puts "mouse key left"
-                return Key.new("mouse_selected", row.to_s)
+                return Key.new("mouse selected", row.to_s)
               end
             else
               # debug_puts "key #{char}"
