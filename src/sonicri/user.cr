@@ -9,17 +9,17 @@ module Sonicri
           S::CategoryInit  => ->category_init_state,
           S::Category      => ->category_state,
           S::MusicInit     => ->music_init_state,
-          S::MusicSelect   => ->music_select_state,
+          S::Music         => ->music_state,
           S::RadioInit     => ->radio_init_state,
-          S::RadioSelect   => ->radio_select_state,
+          S::Radio         => ->radio_state,
           S::StationInit   => ->station_init_state,
           S::StationResume => ->station_resume_state,
-          S::StationSelect => ->station_select_state,
+          S::Station       => ->station_state,
           S::ShowInit      => ->show_init_state,
           S::ShowResume    => ->show_resume_state,
-          S::ShowSelect    => ->show_select_state,
+          S::Show          => ->show_state,
           S::EpisodeInit   => ->episode_init_state,
-          S::EpisodeSelect => ->episode_select_state,
+          S::Episode       => ->episode_state,
           S::EpisodePlay   => ->episode_play_state,
           S::Exit          => ->exit_state,
           S::HelpInit      => ->help_init_state,
@@ -107,7 +107,7 @@ module Sonicri
       A::Init
     end
 
-    private def music_select_state
+    private def music_state
       if key = @ui.monitor("music")
         case key.action
         when "select"
@@ -127,7 +127,7 @@ module Sonicri
       A::Init
     end
 
-    private def radio_select_state
+    private def radio_state
       if key = @ui.monitor("radio")
         case key.action
         when "select"
@@ -154,7 +154,7 @@ module Sonicri
       A::StationResumed
     end
 
-    private def station_select_state
+    private def station_state
       if key = @ui.monitor("station")
         case key.action
         when "select"
@@ -178,7 +178,7 @@ module Sonicri
       A::ShowResumed
     end
 
-    private def show_select_state
+    private def show_state
       if key = @ui.monitor("show")
         case key.action
         when "select"
@@ -200,7 +200,7 @@ module Sonicri
       end
     end
 
-    private def episode_select_state
+    private def episode_state
       if key = @ui.monitor("episode")
         case key.action
         when "select"; return A::EpisodeSelected
