@@ -1,5 +1,5 @@
 require "./sonicri/*"
 
 Sonicri::Terminal.setup
-ppr = Sonicri::User.new
-ppr.run
+user = Sonicri::User.new
+user.run
