@@ -94,6 +94,7 @@ module Sonicri
             raise "Error: Invalid category! (#{key.value.inspect})"
           end
         when "back"; return A::Exit
+        when "quit"; return A::Exit
         when "char"; monitor_playing key.value
         when "help"; return A::Help
         end
@@ -115,6 +116,7 @@ module Sonicri
           @audio.play_music key.value
         when "back"; return A::Back
         when "char"; monitor_playing key.value
+        when "quit"; return A::Exit
         end
       end
       A::NoAction
@@ -134,6 +136,7 @@ module Sonicri
           @audio.play_radio key.value
         when "back"; return A::Back
         when "char"; monitor_playing key.value
+        when "quit"; return A::Exit
         end
       end
       A::NoAction
@@ -159,6 +162,7 @@ module Sonicri
           return A::StationSelected
         when "back"; return A::Back
         when "char"; monitor_playing key.value
+        when "quit"; return A::Exit
         end
       end
       A::NoAction
@@ -182,6 +186,7 @@ module Sonicri
           return A::ShowSelected
         when "back"; return A::Back
         when "char"; monitor_playing key.value
+        when "quit"; return A::Exit
         end
       end
       A::NoAction
@@ -201,6 +206,7 @@ module Sonicri
         when "select"; return A::EpisodeSelected
         when "back"  ; return A::Back
         when "char"  ; monitor_playing key.value
+        when "quit"; return A::Exit
         end
       end
       A::NoAction
