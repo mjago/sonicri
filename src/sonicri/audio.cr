@@ -335,7 +335,6 @@ module Sonicri
           end
           size1 = size
           result = decode(inp: data, insize: size, outsize: BUF_SIZE)
-          Fiber.yield
           process_result(result)
           sleep 0.01 if size1 == 0_i64
         end
