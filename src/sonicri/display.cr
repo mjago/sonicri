@@ -306,7 +306,7 @@ module Sonicri
           @info_win.print("Hit ")
           @info_win.with_color(KeyColor) { @info_win.print(" Arrow Keys ") }
           @info_win.print(" to Cycle, ")
-          @info_win.with_color(KeyColor) { @info_win.print(" ESC ") }
+          @info_win.with_color(KeyColor) { @info_win.print(" Q ") }
           @info_win.print(" to Quit, ")
           @info_win.with_color(KeyColor) { @info_win.print(" H ") }
           @info_win.print(" for Help.")
