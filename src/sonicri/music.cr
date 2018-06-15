@@ -11,15 +11,15 @@ module Sonicri
       parse_music_files(".")
     end
 
-    def top_level?
+    def root?
       @path.empty?
     end
 
-    def push_level(dir)
+    def push(dir)
       @path << "#{dir}"
     end
 
-    def pop_level
+    def pop
       @path.pop
     end
 

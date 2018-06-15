@@ -8,26 +8,22 @@ module Sonicri
           S::Init          => ->init_state,
           S::CategoryInit  => ->category_init_state,
           S::Category      => ->category_state,
+          S::PodcastInit   => ->podcast_init_state,
+          S::Podcast       => ->podcast_state,
+          S::PodcastResume => ->podcast_resume_state,
+          S::EpisodeInit   => ->episode_init_state,
+          S::Episode       => ->episode_state,
+          S::EpisodePlay   => ->episode_play_state,
           S::MusicInit     => ->music_init_state,
           S::Music         => ->music_state,
           S::RadioInit     => ->radio_init_state,
           S::Radio         => ->radio_state,
-          S::StationInit   => ->station_init_state,
-          S::StationResume => ->station_resume_state,
-          S::Station       => ->station_state,
-          S::ShowInit      => ->show_init_state,
-          S::ShowResume    => ->show_resume_state,
-          S::Show          => ->show_state,
-          S::EpisodeInit   => ->episode_init_state,
-          S::Episode       => ->episode_state,
-          S::EpisodePlay   => ->episode_play_state,
-          S::Exit          => ->exit_state,
           S::HelpInit      => ->help_init_state,
           S::Help          => ->help_state,
+          S::Exit          => ->exit_state,
         }
 
       @state = State.new UserStates
-      @list = List.new
       @show = ""
       @xml_url = ""
       @ui = UI.new
@@ -69,16 +65,12 @@ module Sonicri
     # states
 
     private def init_state
-      @ui.list = @list
-      @list.update if @list.outdated?
-      @ui.init_list({type: "categories", value: "init"})
+      @ui.init_list({type: "category", value: "init"})
       A::Init
     end
 
     private def category_init_state
-      @ui.list = @list
-      @list.update if @list.outdated?
-      @ui.init_list({type: "categories", value: ""})
+      @ui.init_list({type: "category", value: ""})
       A::Init
     end
 
@@ -100,6 +92,57 @@ module Sonicri
         end
       end
       A::NoAction
+    end
+
+    private def podcast_init_state
+      @ui.init_list({type: "podcast", value: ""})
+      A::Init
+    end
+
+    private def podcast_state
+      if key = @ui.monitor("podcast")
+        case key.action
+        when "select"
+          @xml_url = key.value
+          return A::PodcastSelected
+        when "back"
+          return A::Back
+        when "quit"; return A::Exit
+        end
+      end
+      A::NoAction
+    end
+
+    private def podcast_resume_state
+      A::Resumed
+    end
+
+    private def episode_init_state
+      if @ui.init_list({type: "episode", value: @xml_url})
+        A::Init
+      else
+        A::EpisodeInitCancelled
+      end
+    end
+
+    private def episode_state
+      if key = @ui.monitor("episode")
+        case key.action
+        when "select"; return A::EpisodeSelected
+        when "back"  ; return A::Back
+        when "char"  ; monitor_playing key.value
+        when "quit"  ; return A::Exit
+        end
+      end
+      A::NoAction
+    end
+
+    private def episode_play_state
+      @audio.stop if @audio.running?
+      await_audio_stop
+      url = @ui.episode_info[:url]
+      @audio.run @ui.file_friendly_name, url
+      A::Back
     end
 
     private def music_init_state
@@ -140,84 +183,6 @@ module Sonicri
         end
       end
       A::NoAction
-    end
-
-    private def station_init_state
-      #      @ui.list = @list
-      @list.parse unless @list.parsed
-      @ui.init_list({type: "stations", value: ""})
-      A::Init
-    end
-
-    private def station_resume_state
-      @ui.resume
-      A::StationResumed
-    end
-
-    private def station_state
-      if key = @ui.monitor("station")
-        case key.action
-        when "select"
-          @show = key.value
-          return A::StationSelected
-        when "back"; return A::Back
-        when "char"; monitor_playing key.value
-        when "quit"; return A::Exit
-        end
-      end
-      A::NoAction
-    end
-
-    private def show_init_state
-      @ui.init_list({type: "shows", value: "#{@show}"})
-      A::Init
-    end
-
-    private def show_resume_state
-      @ui.resume
-      A::ShowResumed
-    end
-
-    private def show_state
-      if key = @ui.monitor("show")
-        case key.action
-        when "select"
-          @xml_url = key.value
-          return A::ShowSelected
-        when "back"; return A::Back
-        when "char"; monitor_playing key.value
-        when "quit"; return A::Exit
-        end
-      end
-      A::NoAction
-    end
-
-    private def episode_init_state
-      if @ui.init_list({type: "episodes", value: @xml_url})
-        A::EpisodeInit
-      else
-        A::EpisodeInitCancelled
-      end
-    end
-
-    private def episode_state
-      if key = @ui.monitor("episode")
-        case key.action
-        when "select"; return A::EpisodeSelected
-        when "back"  ; return A::Back
-        when "char"  ; monitor_playing key.value
-        when "quit"  ; return A::Exit
-        end
-      end
-      A::NoAction
-    end
-
-    private def episode_play_state
-      @audio.stop if @audio.running?
-      await_audio_stop
-      url = @ui.episode_info[:url]
-      @audio.run filename = @ui.file_friendly_name, url
-      A::Back
     end
 
     private def exit_state
@@ -262,7 +227,6 @@ module Sonicri
 
     private def do_exit
       @ui.try { |ui| ui.close }
-      puts "done"
       exit(0)
     end
   end

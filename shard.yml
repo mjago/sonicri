@@ -23,3 +23,6 @@ dependencies:
   libmpg123:
     github: mjago/libmpg123
     branch: master
+  opml:
+    github: mjago/opml
+    branch: master

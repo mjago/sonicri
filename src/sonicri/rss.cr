@@ -1,4 +1,5 @@
 require "xml"
+require "file_utils"
 
 module Sonicri
   class RSS
@@ -17,11 +18,6 @@ module Sonicri
         res.try { |r| temp << r[param].not_nil! }
       end
       temp
-    end
-
-    private def select(val : String)
-      puts "rss selected #{val}"
-      exit
     end
 
     private def fetch(url)

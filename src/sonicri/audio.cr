@@ -106,6 +106,7 @@ module Sonicri
     end
 
     def run(name, addr)
+      puts "run: #{name}"
       display_initializing
       @cache_name = make_cache_name(name)
       if File.exists? @cache_name
