@@ -250,16 +250,13 @@ module Sonicri
       else
         @depth += 1
         @podcast_page = @display.page
-        puts file_friendly_name
         return Key.new("select", resp)
       end
-      puts file_friendly_name
       return Key.new("no action")
     end
 
     private def episode_select
       @program = @display.list[@display.selection]
-      puts file_friendly_name
       return Key.new("select", @display.selection.to_s)
     end
 
