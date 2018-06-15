@@ -1,0 +1,7 @@
+name: opml_downloads
+version: 0.1.0
+category:
+sources:
+   - ["", "http://www.bbc.co.uk/podcasts.opml"]
+   - ["TWIT", "http://feeds.twit.tv/twitshows.opml"]
+   - ["CBC", "http://www.cbc.ca/podcasting/podcasts.opml"]
