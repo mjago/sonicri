@@ -6,19 +6,13 @@ module Sonicri
     PodcastInit
     Podcast
     PodcastResume
+    EpisodeInit
+    Episode
+    EpisodePlay
     MusicInit
     Music
     RadioInit
     Radio
-    #   StationInit
-    #   StationResume
-    #   Station
-    #   ShowInit
-    #   ShowResume
-    #   Show
-    EpisodeInit
-    Episode
-    EpisodePlay
     Exit
     HelpInit
     Help
@@ -31,16 +25,12 @@ module Sonicri
     Exit
     CategorySelected
     PodcastSelected
-    MusicSelected
     RadioSelected
-    #   StationResumed
-    #   StationSelected
-    #   ShowResumed
-    #   ShowSelected
-    Resumed
+    MusicSelected
     EpisodeInit
     EpisodeInitCancelled
     EpisodeSelected
+    Resumed
     Help
   end
 
@@ -55,21 +45,20 @@ module Sonicri
     {st: S::Category, res: A::RadioSelected, to: S::RadioInit},
     {st: S::Category, res: A::Help, to: S::HelpInit},
     {st: S::Category, res: A::Exit, to: S::Exit},
+
     {st: S::PodcastInit, res: A::Init, to: S::Podcast},
     {st: S::Podcast, res: A::PodcastSelected, to: S::EpisodeInit},
     {st: S::Podcast, res: A::Back, to: S::CategoryInit},
     {st: S::Podcast, res: A::Exit, to: S::Exit},
     {st: S::PodcastResume, res: A::Resumed, to: S::Podcast},
+
     {st: S::EpisodeInit, res: A::Init, to: S::Episode},
     {st: S::EpisodeInit, res: A::EpisodeInitCancelled, to: S::PodcastResume},
     {st: S::Episode, res: A::Back, to: S::PodcastResume},
     {st: S::Episode, res: A::EpisodeSelected, to: S::EpisodePlay},
     {st: S::Episode, res: A::Exit, to: S::Exit},
     {st: S::EpisodePlay, res: A::Back, to: S::Episode},
-    {st: S::RadioInit, res: A::Init, to: S::Radio},
-    {st: S::Radio, res: A::RadioSelected, to: S::Init},
-    {st: S::Radio, res: A::Back, to: S::CategoryInit},
-    {st: S::Radio, res: A::Exit, to: S::Exit},
+
     {st: S::MusicInit, res: A::Init, to: S::Music},
     {st: S::Music, res: A::MusicSelected, to: S::Exit},
     {st: S::Music, res: A::Back, to: S::CategoryInit},
@@ -77,5 +66,14 @@ module Sonicri
     {st: S::Exit, res: A::Exit, to: S::Exit},
     {st: S::HelpInit, res: A::Init, to: S::Help},
     {st: S::Help, res: A::Back, to: S::Init},
+
+    {st: S::RadioInit, res: A::Init, to: S::Radio},
+    {st: S::Radio, res: A::RadioSelected, to: S::Exit},
+    {st: S::Radio, res: A::Back, to: S::CategoryInit},
+    {st: S::Radio, res: A::Exit, to: S::Exit},
+    {st: S::Exit, res: A::Exit, to: S::Exit},
+    {st: S::HelpInit, res: A::Init, to: S::Help},
+    {st: S::Help, res: A::Back, to: S::Init},
+
   ]
 end

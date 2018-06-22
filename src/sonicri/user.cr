@@ -25,7 +25,7 @@ module Sonicri
 
       @state = State.new UserStates
       @show = ""
-      @xml_url = ""
+      @url = ""
       @ui = UI.new
       @audio = Audio.new(@ui.display.progress)
       @previous_state = S::Init
@@ -103,7 +103,7 @@ module Sonicri
       if key = @ui.monitor("podcast")
         case key.action
         when "select"
-          @xml_url = key.value
+          @url = key.value
           return A::PodcastSelected
         when "back"
           return A::Back
@@ -117,8 +117,61 @@ module Sonicri
       A::Resumed
     end
 
+    private def radio_init_state
+      @ui.init_list({type: "radio", value: ""})
+      A::Init
+    end
+
+    private def radio_state
+      if key = @ui.monitor("radio")
+        case key.action
+        when "select"
+          url = key.value
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_radio url
+        when "back"
+          return A::Back
+        when "quit"; return A::Exit
+        end
+      end
+      A::NoAction
+    end
+
+    #    private def station_play_state
+    #      @audio.stop if @audio.running?
+    #      await_audio_stop
+    #      url = @ui.station_info[:url]
+    #      @audio.play_radio url
+    #      A::Back
+    #    end
+    #
+    private def music_state
+      if key = @ui.monitor("music")
+        case key.action
+        when "select"
+          @audio.stop if @audio.running?
+          await_audio_stop
+          @audio.play_music key.value
+        when "back"; return A::Back
+        when "char"; monitor_playing key.value
+        when "quit"; return A::Exit
+        end
+      end
+      A::NoAction
+    end
+
+    #    private def radio_resume_state
+    #      A::Resumed
+    #    end
+    #
+    #    private def radio_init_state
+    #      @ui.init_list({type: "radio", value: ""})
+    #      A::Init
+    #    end
+    #
     private def episode_init_state
-      if @ui.init_list({type: "episode", value: @xml_url})
+      if @ui.init_list({type: "episode", value: @url})
         A::Init
       else
         A::EpisodeInitCancelled
@@ -145,44 +198,52 @@ module Sonicri
       A::Back
     end
 
+    #    private def station_init_state
+    #      if @ui.init_list({type: "station", value: @url})
+    #        A::Init
+    #      else
+    #        A::StationInitCancelled
+    #      end
+    #    end
+    #
+    #    private def station_state
+    #      if key = @ui.monitor("station")
+    #        case key.action
+    #        when "select"; return A::StationSelected
+    #        when "back"  ; return A::Back
+    #        when "char"  ; monitor_playing key.value
+    #        when "quit"  ; return A::Exit
+    #        end
+    #      end
+    #      A::NoAction
+    #    end
+    #
+    #    private def station_play_state
+    #      @audio.stop if @audio.running?
+    #      await_audio_stop
+    #      url = @ui.station_info[:url]
+    #      @audio.play_radio url
+    #      A::Back
+    #    end
+    #
+    #    private def radio_state
+    #      if key = @ui.monitor("radio")
+    #        case key.action
+    #        when "select"
+    #          @audio.stop if @audio.running?
+    #          await_audio_stop
+    #          @audio.play_radio key.value
+    #        when "back"; return A::Back
+    #        when "char"; monitor_playing key.value
+    #        when "quit"; return A::Exit
+    #        end
+    #      end
+    #      A::NoAction
+    #    end
+
     private def music_init_state
       @ui.init_list({type: "music", value: ""})
       A::Init
-    end
-
-    private def music_state
-      if key = @ui.monitor("music")
-        case key.action
-        when "select"
-          @audio.stop if @audio.running?
-          await_audio_stop
-          @audio.play_music key.value
-        when "back"; return A::Back
-        when "char"; monitor_playing key.value
-        when "quit"; return A::Exit
-        end
-      end
-      A::NoAction
-    end
-
-    private def radio_init_state
-      @ui.init_list({type: "radio", value: ""})
-      A::Init
-    end
-
-    private def radio_state
-      if key = @ui.monitor("radio")
-        case key.action
-        when "select"
-          @audio.stop if @audio.running?
-          await_audio_stop
-          @audio.play_radio key.value
-        when "back"; return A::Back
-        when "char"; monitor_playing key.value
-        when "quit"; return A::Exit
-        end
-      end
-      A::NoAction
     end
 
     private def exit_state

@@ -9,10 +9,10 @@ module Sonicri
     def initialize
       @page = Page.new
       @podcast_page = Page.new
+      @radio_page = Page.new
       @display = Display.new(@page)
       @keys = Keys.new(@display.list_win)
       @categories = %w[Podcasts Music Radio\ Stations]
-      @station = ""
       @title = ""
       @title_array = [] of String
       @program = ""
@@ -36,8 +36,7 @@ module Sonicri
       when "podcast" ; podcast_init
       when "music"   ; music_init
       when "radio"   ; radio_init
-      when "episode"
-        return_val = episode_init(kind)
+      when "episode" ; return_val = episode_init(kind)
       else
         raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
       end
@@ -112,17 +111,21 @@ module Sonicri
       true
     end
 
+    private def radio_init
+      unless @radio.parsed?
+        @radio = Radio.new
+      end
+      @radio.reset
+      @page.name = "Internet Radio"
+      @display.page = @page
+      @display.load_list @radio.content
+    end
+
     private def music_init
       @music = Music.new
       @page.name = "Music"
       @display.page = @page
       @display.load_list @music.albums
-    end
-
-    private def radio_init
-      @page.name = "Radio"
-      @display.page = @page
-      @display.load_list @radio.station_list
     end
 
     # monitors
@@ -162,6 +165,28 @@ module Sonicri
           return Key.new("back")
         else
           resume "podcast"
+          return Key.new("no action")
+        end
+      else
+        return key
+      end
+    end
+
+    private def radio_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "key selected"
+        return radio_select
+      when "mouse selected"
+        return radio_select if @display.select_maybe(key)
+      when "back"
+        @title_array.pop?
+        if @radio.root?
+          @radio.reset
+          return Key.new("back")
+        else
+          resume "radio"
           return Key.new("no action")
         end
       else
@@ -210,21 +235,6 @@ module Sonicri
       end
     end
 
-    private def radio_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "key selected"
-        return radio_select
-      when "mouse selected"
-        return radio_select if @display.select_maybe(key)
-      when "back"
-        return Key.new("back")
-      else
-        return key
-      end
-    end
-
     private def help_monitor(key)
       return key if key.action
     end
@@ -255,6 +265,30 @@ module Sonicri
       return Key.new("no action")
     end
 
+    private def radio_select
+      selection = @display.selection
+      @title_array << @radio.current_outlines[@display.selection].name
+      if @radio.children?(selection)
+        save_display
+        @radio.push
+      end
+      resp = @radio.select(selection)
+      case resp
+      when "list"
+        @depth += 1
+        @display.load_list @radio.content
+        @display.page = @page
+        @display.draw_partial_page
+      when ""
+        raise "Invalid error in #radio_select"
+      else
+        @depth += 1
+        @radio_page = @display.page
+        return Key.new("select", resp)
+      end
+      return Key.new("no action")
+    end
+
     private def episode_select
       @program = @display.list[@display.selection]
       return Key.new("select", @display.selection.to_s)
@@ -278,17 +312,11 @@ module Sonicri
       end
     end
 
-    private def radio_select
-      name = @radio.station_list[@display.selection]
-      if url = @radio.url_of(name)
-        return Key.new("select", url)
-      end
-    end
-
     # miscellaneous
 
     private def resume(type)
       @podcast.pop if type == "podcast"
+      @radio.pop if type == "radio"
       @music.pop if type == "music"
       @display = @display_stack.pop unless @display_stack.empty?
       @display.draw_partial_page
