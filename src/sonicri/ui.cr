@@ -7,12 +7,12 @@ module Sonicri
     getter keys
 
     def initialize
+      @category = Category.new
       @page = Page.new
       @podcast_page = Page.new
       @radio_page = Page.new
       @display = Display.new(@page)
       @keys = Keys.new(@display.list_win)
-      @categories = %w[Podcasts Music Radio\ Stations]
       @title = ""
       @title_array = [] of String
       @program = ""
@@ -32,7 +32,7 @@ module Sonicri
     def init_list(kind)
       return_val = false
       case (kind[:type])
-      when "category"; category_init
+      when "category"; init(@category, "Categories")
       when "podcast" ; init(@podcast, "Podcasts")
       when "music"   ; init(@music, "Music")
       when "radio"   ; init(@radio, "Internet Radio")
@@ -82,13 +82,6 @@ module Sonicri
 
     # init
 
-    private def category_init
-      @page.name = "Categories"
-      @display.page = @page
-      @display.load_list @categories
-      @title_array.clear
-    end
-
     private def init(kind, title)
       kind.channels.reset
       @page.name = title
@@ -117,12 +110,12 @@ module Sonicri
       when "key selected"
         save_display
         @display.redraw(key)
-        category = @categories[@display.selected]
+        category = @category.channels.content[@display.selected]
         return Key.new("select", category)
       when "mouse selected"
         if @display.select_maybe(key)
           save_display
-          category = @categories[@display.selected]
+          category = @category.channels.content[@display.selected]
           return Key.new("select", category)
         end
       else
