@@ -33,9 +33,9 @@ module Sonicri
       return_val = false
       case (kind[:type])
       when "category"; category_init
-      when "podcast" ; podcast_init
-      when "music"   ; music_init
-      when "radio"   ; radio_init
+      when "podcast" ; init(@podcast, "Podcasts")
+      when "music"   ; init(@music, "Music")
+      when "radio"   ; init(@radio, "Internet Radio")
       when "episode" ; return_val = episode_init(kind)
       else
         raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
@@ -89,14 +89,11 @@ module Sonicri
       @title_array.clear
     end
 
-    private def podcast_init
-      unless @podcast.parsed?
-        @podcast = Podcast.new
-      end
-      @podcast.reset
-      @page.name = "Podcasts"
+    private def init(kind, title)
+      kind.channels.reset
+      @page.name = title
       @display.page = @page
-      @display.load_list @podcast.content
+      @display.load_list kind.channels.content
     end
 
     private def episode_init(kind)
@@ -109,23 +106,6 @@ module Sonicri
         return false
       end
       true
-    end
-
-    private def radio_init
-      unless @radio.parsed?
-        @radio = Radio.new
-      end
-      @radio.reset
-      @page.name = "Internet Radio"
-      @display.page = @page
-      @display.load_list @radio.content
-    end
-
-    private def music_init
-      @music = Music.new
-      @page.name = "Music"
-      @display.page = @page
-      @display.load_list @music.albums
     end
 
     # monitors
@@ -160,33 +140,11 @@ module Sonicri
         return podcast_select if @display.select_maybe(key)
       when "back"
         @title_array.pop?
-        if @podcast.root?
-          @podcast.reset
+        if @podcast.channels.root?
+          @podcast.channels.reset
           return Key.new("back")
         else
           resume "podcast"
-          return Key.new("no action")
-        end
-      else
-        return key
-      end
-    end
-
-    private def radio_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "key selected"
-        return radio_select
-      when "mouse selected"
-        return radio_select if @display.select_maybe(key)
-      when "back"
-        @title_array.pop?
-        if @radio.root?
-          @radio.reset
-          return Key.new("back")
-        else
-          resume "radio"
           return Key.new("no action")
         end
       else
@@ -206,7 +164,7 @@ module Sonicri
       when "back"
         @title_array.pop
         @display.page = @podcast_page
-        @display.load_list @podcast.content
+        @display.load_list @podcast.channels.content
         @display.draw_partial_page
         return key
       else
@@ -223,11 +181,33 @@ module Sonicri
       when "mouse selected"
         return music_select if @display.select_maybe(key)
       when "back"
-        if @music.root?
+        if @music.channels.root?
           return Key.new("back")
         else
           resume "music"
-          @display.load_list @music.contents
+          @display.load_list @music.channels.contents
+          return Key.new("no action")
+        end
+      else
+        return key
+      end
+    end
+
+    private def radio_monitor(key)
+      case key.action
+      when "selection"
+        @display.redraw(key)
+      when "key selected"
+        return radio_select
+      when "mouse selected"
+        return radio_select if @display.select_maybe(key)
+      when "back"
+        @title_array.pop?
+        if @radio.channels.root?
+          @radio.channels.reset
+          return Key.new("back")
+        else
+          resume "radio"
           return Key.new("no action")
         end
       else
@@ -243,16 +223,16 @@ module Sonicri
 
     private def podcast_select
       selection = @display.selection
-      @title_array << @podcast.current_outlines[@display.selection].name
-      if @podcast.children?(selection)
+      @title_array << @podcast.channels.title(@display.selection)
+      if @podcast.channels.children? selection
         save_display
-        @podcast.push
+        @podcast.channels.push
       end
-      resp = @podcast.select(selection)
+      resp = @podcast.select selection
       case resp
       when "list"
         @depth += 1
-        @display.load_list @podcast.content
+        @display.load_list @podcast.channels.content
         @display.page = @page
         @display.draw_partial_page
       when ""
@@ -267,16 +247,16 @@ module Sonicri
 
     private def radio_select
       selection = @display.selection
-      @title_array << @radio.current_outlines[@display.selection].name
-      if @radio.children?(selection)
+      @title_array << @radio.channels.title(@display.selection)
+      if @radio.channels.children? selection
         save_display
-        @radio.push
+        @radio.channels.push
       end
       resp = @radio.select(selection)
       case resp
       when "list"
         @depth += 1
-        @display.load_list @radio.content
+        @display.load_list @radio.channels.content
         @display.page = @page
         @display.draw_partial_page
       when ""
@@ -295,16 +275,16 @@ module Sonicri
     end
 
     private def music_select
-      file = @music.albums[@display.selection]
-      if @music.directory? file
+      file = @music.channels.content[@display.selection]
+      if @music.channels.directory? file
         save_display
-        @music.push file
-        @display.load_list @music.contents
+        @music.channels.push file
+        @display.load_list @music.channels.contents
         @page.name = file
         @display.page = @page
         @display.draw_partial_page
         return Key.new("no action")
-      elsif @music.mp3_file?(file)
+      elsif @music.channels.mp3_file? file
         filename = @music.file_with_path(file)
         return Key.new("select", filename)
       else
@@ -315,9 +295,9 @@ module Sonicri
     # miscellaneous
 
     private def resume(type)
-      @podcast.pop if type == "podcast"
-      @radio.pop if type == "radio"
-      @music.pop if type == "music"
+      @podcast.channels.pop if type == "podcast"
+      @radio.channels.pop if type == "radio"
+      @music.channels.pop if type == "music"
       @display = @display_stack.pop unless @display_stack.empty?
       @display.draw_partial_page
     end

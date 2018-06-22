@@ -4,12 +4,22 @@ module Sonicri
   MUSIC_ROOT = File.expand_path(File.read("./music_root.rc").strip)
 
   class Music
-    getter albums = [] of String
-    setter path = [] of String
+    property channels
 
     def initialize
-      parse_music_files(".")
+      @albums = Albums.new
+      @albums.parse_music_files(".")
+      @channels = @albums
     end
+
+    def file_with_path(file)
+      File.join(@albums.build_dir, file)
+    end
+  end
+
+  class Albums
+    property content = [] of String
+    property path = [] of String
 
     def root?
       @path.empty?
@@ -23,8 +33,16 @@ module Sonicri
       @path.pop
     end
 
-    def file_with_path(file)
-      File.join(build_dir, file)
+    def reset
+      @path = [] of String
+    end
+
+    def contents
+      p = ""
+      @path.each do |dir|
+        p = File.join(p, dir)
+      end
+      parse_music_files p
     end
 
     def parse_music_files(file)
@@ -32,7 +50,7 @@ module Sonicri
       Dir.children(File.join(MUSIC_ROOT, file)).each do |b|
         temp << b if directory?(b) || mp3_file?(b)
       end
-      @albums = temp.sort { |x, y| x <=> y }
+      @content = temp.sort { |x, y| x <=> y }
     end
 
     def directory?(file)
@@ -45,14 +63,6 @@ module Sonicri
 
     def build_dir
       File.join(MUSIC_ROOT, @path.each.join('/'))
-    end
-
-    def contents
-      p = ""
-      @path.each do |dir|
-        p = File.join(p, dir)
-      end
-      parse_music_files p
     end
   end
 end

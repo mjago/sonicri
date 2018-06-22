@@ -9,8 +9,8 @@
       <outline text="BBC Radio 1xtra" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1xtra_mf_p" />
       <outline text="BBC Radio 2" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p" />
       <outline text="BBC Radio 3" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio3_mf_p" />
-      <outline text="BBC Radio 4FM" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p" />
-      <outline text="BBC Radio 4LW" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4lw_mf_p" />
+      <outline text="BBC Radio 4 FM" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p" />
+      <outline text="BBC Radio 4 LW" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4lw_mf_p" />
       <outline text="BBC Radio 4 Extra" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4extra_mf_p" />
       <outline text="BBC Radio 5 Live" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio5live_mf_p" />
       <outline text="BBC Radio 6 Music" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_6music_mf_p" />
@@ -69,7 +69,7 @@
       <outline text="Sleep Radio" htmlUrl="http://149.56.234.138:8169/stream?type=http&nocache=44617" />
     </outline>
     <outline text="Favourites">
-      <outline text="BBC Radio 4FM" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p" />
+      <outline text="BBC Radio 4 FM" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p" />
       <outline text="Chill FM" htmlUrl="http://149.56.234.138:8169/stream?type=http&nocache=44617" />
     </outline>
   </body>

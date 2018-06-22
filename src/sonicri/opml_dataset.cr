@@ -1,9 +1,8 @@
 require "opml"
 
 module Sonicri
-  class Node
+  class OpmlDataset
     @root_outlines : Array(Outline) = Array(Outline).new
-    getter? parsed
     getter current_outlines : Array(Outline) = @root_outlines
 
     def initialize
@@ -35,12 +34,6 @@ module Sonicri
     def parse(file)
       @root_outlines += Opml.parse_file(file)
       @root_outlines = sort_outlines_by_name(@root_outlines)
-      #      names = Array(String).new
-      #      @current_outlines = @root_outlines
-      #      @current_outlines.each do |outline|
-      #        names << outline.name
-      #      end
-      @parsed = true
     end
 
     def title(selection)
