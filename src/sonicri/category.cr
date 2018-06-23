@@ -8,6 +8,9 @@ module Sonicri
 
     def reset
     end
+
+    def root?
+    end
   end
 
   class Category

@@ -18,7 +18,7 @@ module Sonicri
   end
 
   class Albums
-    property content = [] of String
+    @content = [] of String
     property path = [] of String
 
     def root?
@@ -34,10 +34,10 @@ module Sonicri
     end
 
     def reset
-      @path = [] of String
+      #     @path = [] of String
     end
 
-    def contents
+    def content
       p = ""
       @path.each do |dir|
         p = File.join(p, dir)

@@ -2,15 +2,17 @@ require "ncurses"
 
 module Sonicri
   class UI
+    PAGE_TITLES = {"category" => "Categories",
+                   "podcast"  => "Podcasts",
+                   "music"    => "Music",
+                   "radio"    => "Internet Radio"}
     setter list
     getter display
     getter keys
 
     def initialize
-      @category = Category.new
       @page = Page.new
-      @podcast_page = Page.new
-      @radio_page = Page.new
+      @cache_page = Page.new
       @display = Display.new(@page)
       @keys = Keys.new(@display.list_win)
       @title = ""
@@ -18,10 +20,15 @@ module Sonicri
       @program = ""
       @display_stack = Deque(Display).new
       @rss = RSS.new
+      @depth = 0
+      @category = Category.new
       @podcast = Podcast.new
       @music = Music.new
       @radio = Radio.new
-      @depth = 0
+      @media_objs = {"category" => @category,
+                     "podcast"  => @podcast,
+                     "music"    => @music,
+                     "radio"    => @radio}
     end
 
     def close
@@ -32,13 +39,9 @@ module Sonicri
     def init_list(kind)
       return_val = false
       case (kind[:type])
-      when "category"; init(@category, "Categories")
-      when "podcast" ; init(@podcast, "Podcasts")
-      when "music"   ; init(@music, "Music")
-      when "radio"   ; init(@radio, "Internet Radio")
-      when "episode" ; return_val = episode_init(kind)
+      when "episode"; return_val = episode_init(kind)
       else
-        raise "ERROR! invalid kind (#{kind[:type]}) in UI#init_list"
+        init kind[:type]
       end
       case kind["value"]
       when "init"; @display.draw_page
@@ -51,17 +54,12 @@ module Sonicri
     def monitor(source)
       if @keys.key_available?
         key = @keys.next_key
-        case source
-        when "category"; category_monitor(key)
-        when "podcast" ; podcast_monitor(key)
-        when "episode" ; episode_monitor(key)
-        when "music"   ; music_monitor(key)
-        when "radio"   ; radio_monitor(key)
-        when "help"    ; help_monitor(key)
-        else
-          raise "Error! Unknown monitor in UI"
-        end
+        monitor_media(source, key)
       end
+    end
+
+    def display_help
+      @display.draw_help
     end
 
     def file_friendly_name
@@ -79,14 +77,14 @@ module Sonicri
     end
 
     # private
-
     # init
 
-    private def init(kind, title)
-      kind.channels.reset
-      @page.name = title
+    private def init(kind)
+      obj = media_obj(kind)
+      obj.channels.reset
+      @page.name = page_title(kind)
       @display.page = @page
-      @display.load_list kind.channels.content
+      @display.load_list obj.channels.content
     end
 
     private def episode_init(kind)
@@ -103,7 +101,37 @@ module Sonicri
 
     # monitors
 
-    private def category_monitor(key)
+    private def monitor_media(kind, key)
+      case kind
+      when "category"; monitor_category(key)
+      when "episode" ; monitor_episode(key)
+      when "help"    ; return key if key.action
+      else
+        case key.action
+        when "selection"
+          @display.redraw(key)
+        when "key selected"
+          return select_media(kind)
+        when "mouse selected"
+          return select_media(kind) if @display.select_maybe(key)
+        when "back"
+          @title_array.pop?
+          media = media_obj(kind)
+          if media.channels.root?
+            media.channels.reset unless (kind == "music")
+            return Key.new("back")
+          else
+            resume kind
+            @display.load_list(media.channels.content) if (kind == "music")
+            return Key.new("no action")
+          end
+        else
+          return key
+        end
+      end
+    end
+
+    private def monitor_category(key)
       case key.action
       when "selection"
         @display.redraw(key)
@@ -123,143 +151,57 @@ module Sonicri
       end
     end
 
-    private def podcast_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "key selected"
-        return podcast_select
-      when "mouse selected"
-        return podcast_select if @display.select_maybe(key)
-      when "back"
-        @title_array.pop?
-        if @podcast.channels.root?
-          @podcast.channels.reset
-          return Key.new("back")
-        else
-          resume "podcast"
-          return Key.new("no action")
-        end
-      else
-        return key
-      end
-    end
-
-    private def episode_monitor(key)
+    private def monitor_episode(key)
       case key.action
       when "selection"
         @display.redraw(key)
       when "key selected"
         @display.redraw(key)
-        return episode_select
+        return select_media("episode")
       when "mouse selected"
-        return episode_select if @display.select_maybe(key)
+        return select_media("episode") if @display.select_maybe(key)
       when "back"
         @title_array.pop
-        @display.page = @podcast_page
+        @display.page = @cache_page
         @display.load_list @podcast.channels.content
         @display.draw_partial_page
         return key
       else
         return key
       end
-    end
-
-    private def music_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "key selected"
-        return music_select
-      when "mouse selected"
-        return music_select if @display.select_maybe(key)
-      when "back"
-        if @music.channels.root?
-          return Key.new("back")
-        else
-          resume "music"
-          @display.load_list @music.channels.contents
-          return Key.new("no action")
-        end
-      else
-        return key
-      end
-    end
-
-    private def radio_monitor(key)
-      case key.action
-      when "selection"
-        @display.redraw(key)
-      when "key selected"
-        return radio_select
-      when "mouse selected"
-        return radio_select if @display.select_maybe(key)
-      when "back"
-        @title_array.pop?
-        if @radio.channels.root?
-          @radio.channels.reset
-          return Key.new("back")
-        else
-          resume "radio"
-          return Key.new("no action")
-        end
-      else
-        return key
-      end
-    end
-
-    private def help_monitor(key)
-      return key if key.action
     end
 
     # select
 
-    private def podcast_select
-      selection = @display.selection
-      @title_array << @podcast.channels.title(@display.selection)
-      if @podcast.channels.children? selection
-        save_display
-        @podcast.channels.push
-      end
-      resp = @podcast.select selection
-      case resp
-      when "list"
-        @depth += 1
-        @display.load_list @podcast.channels.content
-        @display.page = @page
-        @display.draw_partial_page
-      when ""
-        raise "Invalid error in #podcast_select"
+    private def select_media(kind)
+      case kind
+      when "episode"; episode_select
+      when "music"  ; music_select
       else
-        @depth += 1
-        @podcast_page = @display.page
-        return Key.new("select", resp)
+        media = media_obj(kind)
+        if media.is_a?(Podcast) || media.is_a?(Radio)
+          selection = @display.selection
+          @title_array << media.channels.title(@display.selection)
+          if media.channels.children? selection
+            save_display
+            media.channels.push
+          end
+          resp = media.select selection
+          @depth += 1
+          case resp
+          when "list"
+            @display.load_list media.channels.content
+            @display.page = @page
+            @display.draw_partial_page
+          when ""
+            raise "Invalid error in #podcast_select"
+          else
+            @cache_page = @display.page
+            return Key.new("select", resp)
+          end
+        end
+        return Key.new("no action")
       end
-      return Key.new("no action")
-    end
-
-    private def radio_select
-      selection = @display.selection
-      @title_array << @radio.channels.title(@display.selection)
-      if @radio.channels.children? selection
-        save_display
-        @radio.channels.push
-      end
-      resp = @radio.select(selection)
-      case resp
-      when "list"
-        @depth += 1
-        @display.load_list @radio.channels.content
-        @display.page = @page
-        @display.draw_partial_page
-      when ""
-        raise "Invalid error in #radio_select"
-      else
-        @depth += 1
-        @radio_page = @display.page
-        return Key.new("select", resp)
-      end
-      return Key.new("no action")
     end
 
     private def episode_select
@@ -272,7 +214,7 @@ module Sonicri
       if @music.channels.directory? file
         save_display
         @music.channels.push file
-        @display.load_list @music.channels.contents
+        @display.load_list @music.channels.content
         @page.name = file
         @display.page = @page
         @display.draw_partial_page
@@ -295,10 +237,6 @@ module Sonicri
       @display.draw_partial_page
     end
 
-    def display_help
-      @display.draw_help
-    end
-
     private def save_display
       @display_stack.push @display.dup
     end
@@ -314,6 +252,14 @@ module Sonicri
           end
       end
       array.join
+    end
+
+    private def media_obj(kind)
+      @media_objs[kind]
+    end
+
+    private def page_title(kind)
+      PAGE_TITLES[kind]
     end
   end
 end
