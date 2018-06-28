@@ -6,25 +6,25 @@ require "time"
 
 module Sonicri
   class Audio
+    BYTE_FORMAT  = LibAO::Byte_Format::AO_FMT_BIG
+    LOCAL_MP3    = "local.mp3"
+    BUF_SIZE     = 4 * 1024
+    INFO_POS_ROW = 0
+    INFO_POS_COL = 0
+
     setter win : NCurses::Window | Nil
     property progress : Display::Progress
     include Libao
     include Libmpg123
 
-    BUF_SIZE     = 4800
-    INFO_POS_ROW =    0
-    INFO_POS_COL =    0
-
     def initialize(@progress)
       @source = :feed
       @done = 0_i64
       @rate = 0_i64
-      @channels = @bits = 0
       @running = @quit = false
       @ao = Ao.new
       @dl = Downloader.new
       @ch_play = Channel(Nil).new
-      @auxslice = Bytes.new(BUF_SIZE)
       @ao_buf = Bytes.new(BUF_SIZE)
       @mpg = Mpg123.new
       @mpg.new(nil)
@@ -37,11 +37,9 @@ module Sonicri
 
     def reinitialize
       @source = :feed
-      @channels = @bits = 0
       @running = @quit = false
       @dl = Downloader.new
       @ch_play = Channel(Nil).new
-      @auxslice = Bytes.new(BUF_SIZE)
       @cache_name = ""
       @file_size = 0_i64
       @sample_length = 0_i64
@@ -67,9 +65,9 @@ module Sonicri
       @running
     end
 
-    def move_to_file_cache(start = false)
-      current_pos = start ? 0_i64 : current_sample_offset
-      @mpg.open(@cache_name)
+    def move_to_file_cache(filename = LOCAL_MP3, from_start = false)
+      current_pos = from_start ? 0_i64 : current_sample_offset
+      @mpg.open(filename)
       @mpg.param(:flags, :quiet, 0.0)
       @sample_length = @mpg.length
       @mpg.seek(current_pos)
@@ -85,8 +83,7 @@ module Sonicri
       redir = @dl.follow_redirects(url.not_nil!)
       @mpg.open_feed
       @dl.mode = :radio
-      fiber_get_chunks(redir)
-      fiber_start_common_fibers
+      fiber_start_fibers(redir)
       @running = true
       @pause = false
     end
@@ -99,7 +96,7 @@ module Sonicri
         @sample_length = @mpg.length
         @mpg.seek(0_i64)
         @source = :file
-        fiber_start_common_fibers
+        fiber_start_fibers
         @running = true
         @pause = false
       end
@@ -109,15 +106,14 @@ module Sonicri
       display_initializing
       @cache_name = make_cache_name(name)
       if File.exists? @cache_name
-        move_to_file_cache(start = true)
-        fiber_start_common_fibers
+        move_to_file_cache(@cache_name, from_start: true)
+        fiber_start_fibers
         @running = true
         @pause = false
       else
         redir = @dl.follow_redirects(addr)
         @mpg.open_feed
-        fiber_get_chunks(redir)
-        fiber_start_common_fibers
+        fiber_start_fibers(redir)
         @running = true
         @pause = false
       end
@@ -174,27 +170,15 @@ module Sonicri
       @pause = @pause ? false : true
     end
 
-    private def q_write(slice : Bytes)
-      slice.each do |x|
-        @q.push x
-      end
-    end
-
-    private def q_read
-      size = @q.size
-      if size >= BUF_SIZE
-        return Bytes.new(size) { |x| @q.shift }
-      end
-    end
+    # private
 
     private def set_audio_format
       @rate = 0_i64
       @done = 0_i64
-      @channels = encoding = 0
-      @mpg.get_format(pointerof(@rate), pointerof(@channels), pointerof(encoding))
-      @bits = @mpg.encsize(encoding) * 8
-      byte_format = LibAO::Byte_Format::AO_FMT_BIG
-      @ao.set_format(@bits, @rate, @channels, byte_format, matrix = nil)
+      channels = encoding = 0
+      @mpg.get_format(pointerof(@rate), pointerof(channels), pointerof(encoding))
+      bits = @mpg.encsize(encoding) * 8
+      @ao.set_format(bits, @rate, channels, BYTE_FORMAT, matrix = nil)
       @ao.open_live
     end
 
@@ -210,17 +194,7 @@ module Sonicri
     private def fiber_get_chunks(redir)
       spawn do
         @dl.get_chunks(redir) do |chunk|
-          q_write chunk
-          break if @quit
-          Fiber.yield
-        end
-      end
-    end
-
-    private def fiber_get_chunks
-      spawn do
-        @dl.get_chunks do |chunk|
-          q_write chunk
+          chunk.each { |x| @q.push x }
           break if @quit
           Fiber.yield
         end
@@ -290,13 +264,13 @@ module Sonicri
         while !@quit
           if @dl && @dl.download_done
             if @source == :feed
-              FileUtils.mkdir_p File.dirname(@cache_name)
-              FileUtils.cp "local.mp3", @cache_name
               move_to_file_cache
+              FileUtils.mkdir_p File.dirname(@cache_name)
+              FileUtils.cp LOCAL_MP3, @cache_name
               break
             end
           end
-          sleep 1
+          sleep 0.1
         end
       end
     end
@@ -324,19 +298,11 @@ module Sonicri
             break if @quit
           end
           break if @quit
-          data = nil
           size = @q.size
-          if size >= BUF_SIZE
-            data = q_read
-          else
-            Fiber.yield
-            size = 0_i64
-            data = @auxslice
-          end
-          size1 = size
+          data = Bytes.new(size) { @q.shift }
           result = decode(inp: data, insize: size, outsize: BUF_SIZE)
           process_result(result)
-          sleep 0.01 if size1 == 0_i64
+          Fiber.yield
         end
       end
     end
@@ -359,8 +325,9 @@ module Sonicri
       @win = nil
     end
 
-    private def fiber_start_common_fibers
+    private def fiber_start_fibers(redir = nil)
       fiber_update_display
+      fiber_get_chunks(redir) if redir
       fiber_decode_chunks
       fiber_play_chunks
       fiber_monitor_download

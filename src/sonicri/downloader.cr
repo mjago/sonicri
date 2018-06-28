@@ -5,7 +5,7 @@ module Sonicri
     setter mode
     getter download_done
 
-    BUF_SIZE = 4800
+    BUF_SIZE = 8 * 1024
 
     def self.fetch(file_address, dest_name)
       begin
@@ -53,9 +53,8 @@ module Sonicri
       end
       count.times { |x| @q.push @chunk[x] }
       return nil if @quit
-      qsize = @q.size
-      if qsize >= BUF_SIZE * 3
-        return Slice(UInt8).new(qsize) { @q.shift }
+      if @q.size >= BUF_SIZE
+        return Bytes.new(@q.size) { @q.shift }
       end
       nil
     end
@@ -94,7 +93,6 @@ module Sonicri
                         retry_count += 1
                         raise "too many retries" if retry_count > 5
                         @restart_count = 0
-                        puts "restarting"
                         break
                       end
                     end
@@ -118,7 +116,6 @@ module Sonicri
       return if @quit
       while chunk = channel.receive
         yield chunk
-        sleep 0.005
       end
     end
   end
