@@ -81,11 +81,15 @@ module Sonicri
     def play_radio(url)
       display_initializing
       redir = @dl.follow_redirects(url.not_nil!)
-      @mpg.open_feed
-      @dl.mode = :radio
-      fiber_start_fibers(redir)
-      @running = true
-      @pause = false
+      if redir
+        @mpg.open_feed
+        @dl.mode = :radio
+        fiber_start_fibers(redir)
+        @running = true
+        @pause = false
+      else
+        display_failed_to_connect
+      end
     end
 
     def play_music(file)
@@ -253,6 +257,10 @@ module Sonicri
 
     private def display_initializing
       @progress.print("Initializing...")
+    end
+
+    private def display_failed_to_connect
+      @progress.print("Failed to Connect!")
     end
 
     private def clear_progress

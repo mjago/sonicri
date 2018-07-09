@@ -34,15 +34,19 @@ module Sonicri
 
     def follow_redirects(addr)
       location = ""
-      HTTP::Client.get(addr) do |response|
-        unless response.status_code == 302 || response.status_code == 301
-          return addr
+      begin
+        HTTP::Client.get(addr) do |response|
+          unless response.status_code == 302 || response.status_code == 301
+            return addr
+          end
+          if response.headers["Location"]
+            location = response.headers["Location"]
+          end
         end
-        if response.headers["Location"]
-          location = response.headers["Location"]
-        end
+      rescue Socket::Error | Errno
+      else
+        return follow_redirects(location)
       end
-      return follow_redirects(location)
     end
 
     def process_response(response)

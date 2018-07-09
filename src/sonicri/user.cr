@@ -104,7 +104,7 @@ module Sonicri
         case key.action
         when "select"
           @url = key.value
-          return A::PodcastSelected
+          return A::PodcastSelected unless @url.empty?
         when "back"
           return A::Back
         when "quit"; return A::Exit
@@ -174,6 +174,7 @@ module Sonicri
       if @ui.init_list({type: "episode", value: @url})
         A::Init
       else
+        @ui.display.progress.print("Failed to Connect!")
         A::EpisodeInitCancelled
       end
     end

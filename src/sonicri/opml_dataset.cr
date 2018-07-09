@@ -32,8 +32,11 @@ module Sonicri
     end
 
     def parse(file)
-      @root_outlines += Opml.parse_file(file)
-      @root_outlines = sort_outlines_by_name(@root_outlines)
+      outlines = Opml.parse_file(file)
+      if outlines
+        @root_outlines += outlines
+        @root_outlines = sort_outlines_by_name(@root_outlines)
+      end
     end
 
     def title(selection)

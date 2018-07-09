@@ -22,8 +22,10 @@ module Sonicri
 
     private def fetch(url)
       Downloader.fetch(url, TEMP_RSS)
-      FileUtils.cp(TEMP_RSS, RSS_FILE)
-      true
+      unless TEMP_RSS.empty?
+        FileUtils.cp(TEMP_RSS, RSS_FILE)
+        true
+      end
     end
 
     def parse(url)

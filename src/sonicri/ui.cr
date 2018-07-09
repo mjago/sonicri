@@ -39,7 +39,8 @@ module Sonicri
     def init_list(kind)
       return_val = false
       case (kind[:type])
-      when "episode"; return_val = episode_init(kind)
+      when "episode"
+        return_val = episode_init(kind)
       else
         init kind[:type]
       end
@@ -194,7 +195,7 @@ module Sonicri
             @display.page = @page
             @display.draw_partial_page
           when ""
-            raise "Invalid error in #podcast_select"
+            return Key.new("no action")
           else
             @cache_page = @display.page
             return Key.new("select", resp)
