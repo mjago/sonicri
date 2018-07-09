@@ -65,12 +65,12 @@
       <outline text="BBC Radio York" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_lryork_mf_p" />
     </outline>
     <outline text="Chilled Radio">
-      <outline text="Chill FM" htmlUrl="http://149.56.234.138:8169/stream?type=http&nocache=44617" />
+      <outline text="Chill FM" htmlUrl="http://ice-sov.musicradio.com:80/ChillMP3" />
       <outline text="Sleep Radio" htmlUrl="http://149.56.234.138:8169/stream?type=http&nocache=44617" />
     </outline>
     <outline text="Favourites">
       <outline text="BBC Radio 4 FM" htmlUrl="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio4fm_mf_p" />
-      <outline text="Chill FM" htmlUrl="http://149.56.234.138:8169/stream?type=http&nocache=44617" />
+      <outline text="Chill FM" htmlUrl="http://ice-sov.musicradio.com:80/ChillMP3" />
     </outline>
   </body>
 </opml>
